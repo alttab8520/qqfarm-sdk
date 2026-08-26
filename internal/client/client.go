@@ -16,7 +16,8 @@ import (
 const wsBase = "wss://gate-obt.nqf.qq.com/prod/ws"
 
 type Client struct {
-	enc crypto.Encryptor
+	enc     crypto.Encryptor
+	openErr error
 
 	mu        sync.Mutex
 	conn      *websocket.Conn
@@ -29,7 +30,10 @@ type Client struct {
 }
 
 func New() game.Session {
-	return NewWith(crypto.Identity{})
+	enc, err := crypto.Open()
+	c := NewWith(enc)
+	c.openErr = err
+	return c
 }
 
 func NewWith(enc crypto.Encryptor) *Client {
@@ -40,10 +44,13 @@ func NewWith(enc crypto.Encryptor) *Client {
 }
 
 func (c *Client) Login(ctx context.Context, in game.LoginIn) (game.User, error) {
+	if c.openErr != nil {
+		return game.User{}, c.openErr
+	}
 	if in.Code == "" {
 		return game.User{}, fmt.Errorf("code 不能为空")
 	}
-	_ = c.Close()
+	_ = c.closeConn()
 	c.mu.Lock()
 	c.pending = map[int64]chan gate.Message{}
 	c.seq = 0
@@ -75,6 +82,12 @@ func (c *Client) Login(ctx context.Context, in game.LoginIn) (game.User, error) 
 	if err != nil {
 		_ = c.Close()
 		return game.User{}, err
+	}
+	if openID := user.OpenID; openID != "" {
+		if err := c.enc.BindUser(openID); err != nil {
+			_ = c.Close()
+			return game.User{}, fmt.Errorf("绑定用户失败: %w", err)
+		}
 	}
 	c.mu.Lock()
 	c.user = user
@@ -157,6 +170,16 @@ func (c *Client) Help(ctx context.Context, in game.HelpIn) error {
 }
 
 func (c *Client) Close() error {
+	err := c.closeConn()
+	if c.enc != nil {
+		if e := c.enc.Close(); e != nil && err == nil {
+			err = e
+		}
+	}
+	return err
+}
+
+func (c *Client) closeConn() error {
 	c.mu.Lock()
 	c.closed = true
 	conn := c.conn
@@ -177,7 +200,7 @@ func (c *Client) call(ctx context.Context, service, method string, body []byte) 
 	if body == nil {
 		body = []byte{}
 	}
-	sealed, err := c.enc.Encrypt(body)
+	sealed, token, err := c.enc.Seal(body)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +215,7 @@ func (c *Client) call(ctx context.Context, service, method string, body []byte) 
 	ch := make(chan gate.Message, 1)
 	c.pending[seq] = ch
 	conn := c.conn
-	raw := gate.EncodeRequest(service, method, sealed, c.enc.Token(), seq, serverSeq)
+	raw := gate.EncodeRequest(service, method, sealed, token, seq, serverSeq)
 	c.mu.Unlock()
 
 	if err := conn.Write(ctx, websocket.MessageBinary, raw); err != nil {

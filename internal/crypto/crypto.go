@@ -2,23 +2,32 @@ package crypto
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 )
 
 const tokenAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-// Encryptor seals an RPC body. Production traffic needs the official runtime;
-// tests can use Identity.
+// Encryptor seals RPC bodies and issues gateway tokens.
+// Seal is atomic so the one-shot post-login credential cannot be stolen by a concurrent call.
 type Encryptor interface {
-	Encrypt(body []byte) ([]byte, error)
-	Token() string
+	Seal(body []byte) (sealed []byte, token string, err error)
+	BindUser(openID string) error
+	Close() error
 }
 
 type Identity struct{}
 
-func (Identity) Encrypt(body []byte) ([]byte, error) { return body, nil }
-
-func (Identity) Token() string { return NewGatewayToken() }
+func (Identity) Seal(body []byte) ([]byte, string, error) {
+	if body == nil {
+		body = []byte{}
+	}
+	return body, NewGatewayToken(), nil
+}
+func (Identity) BindUser(string) error { return nil }
+func (Identity) Close() error          { return nil }
 
 func NewGatewayToken() string {
 	n := 64 + intn(64)
@@ -38,4 +47,41 @@ func intn(max int) int {
 		return 0
 	}
 	return int(n.Int64())
+}
+
+// Open loads the official encrypt runtime. Missing wasm is a hard error —
+// falling back to plaintext would talk to the live gate and fail opaquely.
+func Open() (Encryptor, error) {
+	path, err := findWASM()
+	if err != nil {
+		return nil, err
+	}
+	return NewRuntime(path)
+}
+
+func findWASM() (string, error) {
+	if p := os.Getenv("FARM_WASM"); p != "" {
+		if st, err := os.Stat(p); err == nil && st.Size() > 0 {
+			return p, nil
+		}
+		return "", fmt.Errorf("FARM_WASM 无效: %s", p)
+	}
+	cwd, _ := os.Getwd()
+	exe, _ := os.Executable()
+	var candidates []string
+	for _, dir := range []string{cwd, filepath.Dir(exe)} {
+		if dir == "" {
+			continue
+		}
+		candidates = append(candidates,
+			filepath.Join(dir, "data", "tsdk-v3.8.2.wasm"),
+			filepath.Join(dir, "tsdk-v3.8.2.wasm"),
+		)
+	}
+	for _, p := range candidates {
+		if st, err := os.Stat(p); err == nil && st.Size() > 0 {
+			return p, nil
+		}
+	}
+	return "", fmt.Errorf("未找到加密运行时，请将 tsdk-v3.8.2.wasm 放到 data/ 或设置 FARM_WASM")
 }

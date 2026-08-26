@@ -8,7 +8,7 @@
 { "code": 0, "msg": "ok", "data": {} }
 ```
 
-登录后会连游戏网关，接口走真实 RPC。当前请求体加密是直通，正式服可能拒绝，下一步补加密。
+登录后会连游戏网关，接口走真实 RPC。请求体需要官方加密运行时：把 `tsdk-v3.8.2.wasm` 放到 `data/`，或设置 `FARM_WASM`。文件必须是 160999 字节，SHA256 `705e326caad538d6cccb40cb1bd54573525a42d12215c9da9c9c513ec4850a5f`。仓库不收录该文件。
 
 ## 范围
 
@@ -28,6 +28,8 @@
 默认只听本机。
 
 ```text
+# 先把 tsdk-v3.8.2.wasm 放到 data/，或：
+# set FARM_WASM=D:\path\to\tsdk-v3.8.2.wasm
 go run .
 ```
 
@@ -41,7 +43,7 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 ## 版本
 
-当前 **0.2.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
+当前 **0.3.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
 
 发新版：
 
@@ -55,4 +57,5 @@ GitHub Actions 遇到 `v*` 标签会编好 Windows / Linux / macOS 二进制并�
 
 - 非官方，不保证能用，不保证账号安全
 - 不要对公网开放
-- 仓库里不要提交账号、票据、更新服务器地址
+- 仓库里不要提交账号、票据、加密运行时 wasm
+- 登录前必须能找到 `tsdk-v3.8.2.wasm`，否则 `/User/Login` 直接失败
