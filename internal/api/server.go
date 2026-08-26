@@ -897,6 +897,300 @@ func NewMux(hub *Hub) *http.ServeMux {
 		}
 		writeReply(w, OK(map[string]any{"items": items}))
 	})
+	mux.HandleFunc("POST /Dog/Info", func(w http.ResponseWriter, r *http.Request) {
+		yard, err := hub.Dog(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(yard))
+	})
+	mux.HandleFunc("POST /Dog/Feed", func(w http.ResponseWriter, r *http.Request) {
+		var in game.FeedIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		left, err := hub.Feed(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"food_left": left}))
+	})
+	mux.HandleFunc("POST /Dog/ClaimGifts", func(w http.ResponseWriter, r *http.Request) {
+		items, err := hub.ClaimDogGifts(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"items": items}))
+	})
+	mux.HandleFunc("POST /Dog/Logs", func(w http.ResponseWriter, r *http.Request) {
+		var in game.PageIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		logs, err := hub.DogLogs(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"logs": logs}))
+	})
+	mux.HandleFunc("POST /Dog/Deploy", func(w http.ResponseWriter, r *http.Request) {
+		var in game.IDIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		out, err := hub.DeployDog(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(out))
+	})
+	mux.HandleFunc("POST /Dog/Withdraw", func(w http.ResponseWriter, r *http.Request) {
+		out, err := hub.WithdrawDog(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(out))
+	})
+	mux.HandleFunc("POST /Dog/Activate", func(w http.ResponseWriter, r *http.Request) {
+		var in game.IDIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		dog, err := hub.ActivateDog(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(dog))
+	})
+	mux.HandleFunc("POST /Bulletin/List", func(w http.ResponseWriter, r *http.Request) {
+		var in game.PageIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		list, err := hub.Bulletins(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"bulletins": list}))
+	})
+	mux.HandleFunc("POST /Bulletin/Read", func(w http.ResponseWriter, r *http.Request) {
+		var in game.IDIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		detail, err := hub.ReadBulletin(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(detail))
+	})
+	mux.HandleFunc("POST /Mutant/List", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.Mutants(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"mutants": list}))
+	})
+	mux.HandleFunc("POST /Career/Info", func(w http.ResponseWriter, r *http.Request) {
+		info, err := hub.Career(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(info))
+	})
+	mux.HandleFunc("POST /Rank/List", func(w http.ResponseWriter, r *http.Request) {
+		var in game.RankIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		board, err := hub.Ranks(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(board))
+	})
+	mux.HandleFunc("POST /Avatar/Owned", func(w http.ResponseWriter, r *http.Request) {
+		var in game.TypeIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		list, err := hub.Avatars(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"avatars": list}))
+	})
+	mux.HandleFunc("POST /Avatar/Equipped", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.EquippedAvatars(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"avatars": list}))
+	})
+	mux.HandleFunc("POST /Avatar/Equip", func(w http.ResponseWriter, r *http.Request) {
+		var in game.AvatarEquipIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		av, err := hub.EquipAvatar(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(av))
+	})
+	mux.HandleFunc("POST /Skin/Owned", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.Skins(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"skins": list}))
+	})
+	mux.HandleFunc("POST /Skin/Equipped", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.EquippedSkins(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"skins": list}))
+	})
+	mux.HandleFunc("POST /Skin/Equip", func(w http.ResponseWriter, r *http.Request) {
+		var in game.SkinEquipIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		if err := hub.EquipSkin(r.Context(), in); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
+	mux.HandleFunc("POST /Drop/List", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.Drops(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"drops": list}))
+	})
+	mux.HandleFunc("POST /Solar/List", func(w http.ResponseWriter, r *http.Request) {
+		list, err := hub.SolarTerms(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"terms": list}))
+	})
+	mux.HandleFunc("POST /Solar/Claim", func(w http.ResponseWriter, r *http.Request) {
+		var in game.IDIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		items, err := hub.ClaimSolar(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"items": items}))
+	})
+	mux.HandleFunc("POST /Solar/ClaimAll", func(w http.ResponseWriter, r *http.Request) {
+		items, err := hub.ClaimAllSolar(r.Context())
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"items": items}))
+	})
+	mux.HandleFunc("POST /Achieve/View", func(w http.ResponseWriter, r *http.Request) {
+		var in game.AchieveIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		view, err := hub.AchieveView(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(view))
+	})
+	mux.HandleFunc("POST /Achieve/ClaimGoal", func(w http.ResponseWriter, r *http.Request) {
+		var in game.AchieveGoalIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		items, err := hub.ClaimAchieveGoal(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"items": items}))
+	})
+	mux.HandleFunc("POST /Achieve/ClaimLevel", func(w http.ResponseWriter, r *http.Request) {
+		var in game.AchieveIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		items, err := hub.ClaimAchieveLevel(r.Context(), in)
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(map[string]any{"items": items}))
+	})
 	return mux
 }
 

@@ -507,6 +507,216 @@ type Album struct {
 	Claimable bool        `json:"claimable"`
 }
 
+type Dog struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name,omitempty"`
+	Protect   int64  `json:"protect,omitempty"`
+	Owned     bool   `json:"owned"`
+	Activated bool   `json:"activated"`
+	Price     int64  `json:"price,omitempty"`
+	Expire    int64  `json:"expire,omitempty"`
+}
+
+type DogFood struct {
+	ID      int64 `json:"id"`
+	Seconds int64 `json:"seconds,omitempty"`
+	Count   int64 `json:"count"`
+}
+
+type DogSkill struct {
+	ID    int64 `json:"id"`
+	DogID int64 `json:"dog_id,omitempty"`
+	Used  int64 `json:"used"`
+	Max   int64 `json:"max,omitempty"`
+}
+
+type DogYard struct {
+	Dogs     []Dog      `json:"dogs"`
+	Deployed int64      `json:"deployed,omitempty"`
+	FoodLeft int64      `json:"food_left"`
+	FoodMax  int64      `json:"food_max,omitempty"`
+	Foods    []DogFood  `json:"foods"`
+	NewLog   bool       `json:"new_log,omitempty"`
+	Pending  int64      `json:"pending,omitempty"`
+	Skills   []DogSkill `json:"skills,omitempty"`
+}
+
+type FeedIn struct {
+	FoodID int64 `json:"food_id"`
+	Count  int64 `json:"count"`
+}
+
+type PageIn struct {
+	From  int64 `json:"from"`
+	Count int64 `json:"count"`
+}
+
+type ProtectLog struct {
+	Time    int64  `json:"time"`
+	GID     int64  `json:"gid"`
+	Name    string `json:"name,omitempty"`
+	Avatar  string `json:"avatar_url,omitempty"`
+	Level   int64  `json:"level,omitempty"`
+	DogID   int64  `json:"dog_id,omitempty"`
+	DogName string `json:"dog_name,omitempty"`
+	Count   int64  `json:"count,omitempty"`
+	Gold    int64  `json:"gold,omitempty"`
+	Skill   string `json:"skill,omitempty"`
+}
+
+type DeployOut struct {
+	Deployed int64 `json:"deployed,omitempty"`
+	Previous int64 `json:"previous,omitempty"`
+}
+
+type Bulletin struct {
+	ID     int64  `json:"id"`
+	Title  string `json:"title,omitempty"`
+	Read   bool   `json:"read"`
+	Forced bool   `json:"forced,omitempty"`
+}
+
+type BulletinDetail struct {
+	Title   string `json:"title,omitempty"`
+	Content string `json:"content,omitempty"`
+	Start   string `json:"start,omitempty"`
+	End     string `json:"end,omitempty"`
+}
+
+type Mutant struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name,omitempty"`
+	Type     int64  `json:"type,omitempty"`
+	FruitID  int64  `json:"fruit_id,omitempty"`
+	PlantID  int64  `json:"plant_id,omitempty"`
+	Unlocked bool   `json:"unlocked"`
+	Rewards  []Item `json:"rewards,omitempty"`
+}
+
+type Career struct {
+	GID       int64  `json:"gid,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Level     int64  `json:"level,omitempty"`
+	Exp       int64  `json:"exp,omitempty"`
+	Avatar    string `json:"avatar_url,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Harvested int64  `json:"harvested"`
+	Stolen    int64  `json:"stolen"`
+	Items     []Item `json:"items,omitempty"`
+}
+
+type RankIn struct {
+	Type int64 `json:"type"`
+	Page int64 `json:"page"`
+}
+
+type RankItem struct {
+	GID    int64  `json:"gid"`
+	Name   string `json:"name,omitempty"`
+	Value  int64  `json:"value"`
+	Rank   int64  `json:"rank"`
+	Avatar string `json:"avatar_url,omitempty"`
+	Level  int64  `json:"level,omitempty"`
+}
+
+type RankBoard struct {
+	Items []RankItem `json:"items"`
+	Total int64      `json:"total,omitempty"`
+}
+
+type TypeIn struct {
+	Type int64 `json:"type"`
+}
+
+type Avatar struct {
+	ID     int64 `json:"id"`
+	Type   int64 `json:"type,omitempty"`
+	Count  int64 `json:"count,omitempty"`
+	New    bool  `json:"new,omitempty"`
+	Expire int64 `json:"expire,omitempty"`
+}
+
+type AvatarEquipIn struct {
+	ID  int64 `json:"id"`
+	Off bool  `json:"off"`
+}
+
+type Skin struct {
+	ID       int64 `json:"id"`
+	Slot     int64 `json:"slot,omitempty"`
+	Equipped bool  `json:"equipped"`
+	Expire   int64 `json:"expire,omitempty"`
+}
+
+type SkinEquipIn struct {
+	Current int64 `json:"current_id"`
+	ID      int64 `json:"id"`
+}
+
+type DropReward struct {
+	ID      int64 `json:"id"`
+	Count   int64 `json:"count"`
+	Chance  int64 `json:"chance,omitempty"`
+	Claimed bool  `json:"claimed"`
+}
+
+type Drop struct {
+	ID      int64        `json:"id"`
+	Name    string       `json:"name,omitempty"`
+	Status  int64        `json:"status,omitempty"`
+	Start   int64        `json:"start,omitempty"`
+	End     int64        `json:"end,omitempty"`
+	Dropped int64        `json:"dropped"`
+	Limit   int64        `json:"limit,omitempty"`
+	Rewards []DropReward `json:"rewards,omitempty"`
+}
+
+type SolarTerm struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name,omitempty"`
+	Status  int64  `json:"status"`
+	Start   int64  `json:"start,omitempty"`
+	End     int64  `json:"end,omitempty"`
+	Rewards []Item `json:"rewards,omitempty"`
+}
+
+type AchieveIn struct {
+	Kind int64 `json:"kind"`
+	ID   int64 `json:"id"`
+}
+
+type AchieveGoalIn struct {
+	Kind   int64 `json:"kind"`
+	ID     int64 `json:"id"`
+	GoalID int64 `json:"goal_id"`
+}
+
+type AchieveGoal struct {
+	ID       int64  `json:"id"`
+	Progress int64  `json:"progress"`
+	Total    int64  `json:"total,omitempty"`
+	Claimed  bool   `json:"claimed"`
+	Desc     string `json:"desc,omitempty"`
+}
+
+type AchieveLevel struct {
+	Level   int64  `json:"level"`
+	Need    int64  `json:"need,omitempty"`
+	Claimed bool   `json:"claimed"`
+	Rewards []Item `json:"rewards,omitempty"`
+}
+
+type AchieveScope struct {
+	Kind    int64          `json:"kind"`
+	ID      int64          `json:"id"`
+	Level   int64          `json:"level"`
+	Exp     int64          `json:"exp"`
+	Next    int64          `json:"next,omitempty"`
+	Claimed int64          `json:"claimed_level,omitempty"`
+	Goals   []AchieveGoal  `json:"goals,omitempty"`
+	Levels  []AchieveLevel `json:"levels,omitempty"`
+}
+
 type Status struct {
 	LoggedIn bool `json:"logged_in"`
 	User     User `json:"user,omitempty"`
@@ -592,6 +802,31 @@ type Session interface {
 	VisitLogs(ctx context.Context) ([]VisitLog, error)
 	Album(ctx context.Context, in AlbumIn) (Album, error)
 	ClaimAlbum(ctx context.Context, in AlbumIn) ([]Item, error)
+	Dog(ctx context.Context) (DogYard, error)
+	Feed(ctx context.Context, in FeedIn) (int64, error)
+	ClaimDogGifts(ctx context.Context) ([]Item, error)
+	DogLogs(ctx context.Context, in PageIn) ([]ProtectLog, error)
+	DeployDog(ctx context.Context, in IDIn) (DeployOut, error)
+	WithdrawDog(ctx context.Context) (DeployOut, error)
+	ActivateDog(ctx context.Context, in IDIn) (Dog, error)
+	Bulletins(ctx context.Context, in PageIn) ([]Bulletin, error)
+	ReadBulletin(ctx context.Context, in IDIn) (BulletinDetail, error)
+	Mutants(ctx context.Context) ([]Mutant, error)
+	Career(ctx context.Context) (Career, error)
+	Ranks(ctx context.Context, in RankIn) (RankBoard, error)
+	Avatars(ctx context.Context, in TypeIn) ([]Avatar, error)
+	EquippedAvatars(ctx context.Context) ([]Avatar, error)
+	EquipAvatar(ctx context.Context, in AvatarEquipIn) (Avatar, error)
+	Skins(ctx context.Context) ([]Skin, error)
+	EquippedSkins(ctx context.Context) ([]Skin, error)
+	EquipSkin(ctx context.Context, in SkinEquipIn) error
+	Drops(ctx context.Context) ([]Drop, error)
+	SolarTerms(ctx context.Context) ([]SolarTerm, error)
+	ClaimSolar(ctx context.Context, in IDIn) ([]Item, error)
+	ClaimAllSolar(ctx context.Context) ([]Item, error)
+	AchieveView(ctx context.Context, in AchieveIn) (AchieveScope, error)
+	ClaimAchieveGoal(ctx context.Context, in AchieveGoalIn) ([]Item, error)
+	ClaimAchieveLevel(ctx context.Context, in AchieveIn) ([]Item, error)
 	Close() error
 }
 

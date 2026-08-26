@@ -86,6 +86,31 @@
 | `POST /Visit/Logs` | 来访记录。`action`：1浇水 2除虫 3除草 4偷菜 5放虫 6放草 |
 | `POST /Album/List` | 图鉴，body: `{"type","rarity"}`。`type` 不填为普通 `1`，`2` 是超变 |
 | `POST /Album/Claim` | 领图鉴奖励，body: `{"type"}` |
+| `POST /Dog/Info` | 护主犬、狗粮剩余秒、粮库存、待领礼物 |
+| `POST /Dog/Feed` | 喂狗粮，body: `{"food_id","count"}`。`food_id` 从 `Dog/Info` 取。不自动补 |
+| `POST /Dog/ClaimGifts` | 领技能礼物 |
+| `POST /Dog/Logs` | 护院日志，body: `{"from","count"}`。`count` 不填为 `50` |
+| `POST /Dog/Deploy` | 出战，body: `{"id"}` |
+| `POST /Dog/Withdraw` | 收回出战犬 |
+| `POST /Dog/Activate` | 激活已有的狗，body: `{"id"}`。不买新狗 |
+| `POST /Bulletin/List` | 公告，body: `{"from","count"}`。`count` 不填为 `20` |
+| `POST /Bulletin/Read` | 公告正文，body: `{"id"}` |
+| `POST /Mutant/List` | 变异图鉴 |
+| `POST /Career/Info` | 生涯收获 / 被偷统计 |
+| `POST /Rank/List` | 排行榜，body: `{"type","page"}`。都不填则 `type=1`、`page=1` |
+| `POST /Avatar/Owned` | 已有头像框，body: `{"type"}` 可筛选 |
+| `POST /Avatar/Equipped` | 当前头像框 |
+| `POST /Avatar/Equip` | 穿/脱，body: `{"id","off"}`。`off=true` 卸下 |
+| `POST /Skin/Owned` | 已有皮肤 |
+| `POST /Skin/Equipped` | 当前皮肤 |
+| `POST /Skin/Equip` | 换皮肤，body: `{"current_id","id"}`。`id=0` 卸下 |
+| `POST /Drop/List` | 随机掉落活动，只读 |
+| `POST /Solar/List` | 节气。`status`：1未到 2可领 3已领 4过期未领 5过期已领 |
+| `POST /Solar/Claim` | 领一个节气，body: `{"id"}` |
+| `POST /Solar/ClaimAll` | 领完当前可领的节气 |
+| `POST /Achieve/View` | 成就域，body: `{"kind","id"}` |
+| `POST /Achieve/ClaimGoal` | 领成就目标，body: `{"kind","id","goal_id"}` |
+| `POST /Achieve/ClaimLevel` | 领成就域等级，body: `{"kind","id"}` |
 
 ## 运行
 
@@ -107,7 +132,7 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 ## 版本
 
-当前 **1.3.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
+当前 **1.5.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
 
 发新版：
 

@@ -7,6 +7,84 @@ import (
 	"github.com/alttab8520/qqfarm-sdk/internal/pb"
 )
 
+func TestEncodeRankAndAvatarEquip(t *testing.T) {
+	raw := encodeRank(0, 0)
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pb.IntField(m, 1) != 1 || pb.IntField(m, 2) != 1 {
+		t.Fatalf("%+v", m)
+	}
+	raw = encodeAvatarEquip(0, true)
+	m, err = pb.FieldMap(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := m[2]; !ok {
+		t.Fatal("unequip flag omitted")
+	}
+	item := pb.NewEncoder()
+	item.Int(1, 7)
+	item.String(2, "甲")
+	item.Int(4, 1)
+	top := pb.NewEncoder()
+	top.Message(1, item.Bytes())
+	top.Int(2, 99)
+	board, err := decodeRankBoard(top.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if board.Total != 99 || len(board.Items) != 1 || board.Items[0].GID != 7 {
+		t.Fatalf("%+v", board)
+	}
+}
+
+func TestDecodeDogYardAndBulletin(t *testing.T) {
+	dog := pb.NewEncoder()
+	dog.Int(1, 2)
+	dog.String(2, "旺")
+	dog.Bool(6, true)
+	food := pb.NewEncoder()
+	food.Int(1, 1)
+	food.Int(2, 3600)
+	food.Int(3, 4)
+	yard := pb.NewEncoder()
+	yard.Message(1, dog.Bytes())
+	yard.Int(2, 2)
+	yard.Int(3, 90)
+	yard.Message(5, food.Bytes())
+	got, err := decodeDogYard(yard.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Deployed != 2 || got.FoodLeft != 90 || len(got.Dogs) != 1 || got.Dogs[0].Name != "旺" || len(got.Foods) != 1 {
+		t.Fatalf("%+v", got)
+	}
+
+	raw := encodeFeed(1, 2)
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pb.IntField(m, 1) != 1 || pb.IntField(m, 2) != 2 {
+		t.Fatalf("%+v", m)
+	}
+
+	brief := pb.NewEncoder()
+	brief.Int(1, 9)
+	brief.String(2, "更")
+	list := pb.NewEncoder()
+	list.Message(1, brief.Bytes())
+	bs, err := decodeBulletins(list.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bs) != 1 || bs[0].ID != 9 || bs[0].Title != "更" {
+		t.Fatalf("%+v", bs)
+	}
+}
+
 func TestEncodeLoginHasSceneAndDevice(t *testing.T) {
 	raw := encodeLogin()
 	m, err := pb.FieldMap(raw)

@@ -1015,6 +1015,327 @@ func (c *Client) MysteryLeave(ctx context.Context) error {
 	return err
 }
 
+func (c *Client) Dog(ctx context.Context) (game.DogYard, error) {
+	if _, err := c.Info(); err != nil {
+		return game.DogYard{}, err
+	}
+	body, err := c.call(ctx, "Dog", "GetDogInfo", nil)
+	if err != nil {
+		return game.DogYard{}, err
+	}
+	return decodeDogYard(body)
+}
+
+func (c *Client) Feed(ctx context.Context, in game.FeedIn) (int64, error) {
+	if _, err := c.Info(); err != nil {
+		return 0, err
+	}
+	if in.FoodID <= 0 {
+		return 0, fmt.Errorf("food_id 不能为空")
+	}
+	body, err := c.call(ctx, "Dog", "AddFood", encodeFeed(in.FoodID, in.Count))
+	if err != nil {
+		return 0, err
+	}
+	return decodeFoodLeft(body)
+}
+
+func (c *Client) ClaimDogGifts(ctx context.Context) ([]game.Item, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Dog", "ClaimSkillGifts", nil)
+	if err != nil {
+		return nil, err
+	}
+	items, err := decodeItemsAt(body, 1)
+	if err != nil {
+		return nil, err
+	}
+	_, _ = c.Bag(ctx)
+	return items, nil
+}
+
+func (c *Client) DogLogs(ctx context.Context, in game.PageIn) ([]game.ProtectLog, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Dog", "GetProtectLogs", encodePage(in.From, in.Count, 50))
+	if err != nil {
+		return nil, err
+	}
+	return decodeProtectLogs(body)
+}
+
+func (c *Client) DeployDog(ctx context.Context, in game.IDIn) (game.DeployOut, error) {
+	if _, err := c.Info(); err != nil {
+		return game.DeployOut{}, err
+	}
+	if in.ID <= 0 {
+		return game.DeployOut{}, fmt.Errorf("id 不能为空")
+	}
+	body, err := c.call(ctx, "Dog", "DeployDog", encodeLandID(in.ID))
+	if err != nil {
+		return game.DeployOut{}, err
+	}
+	return decodeDeploy(body)
+}
+
+func (c *Client) WithdrawDog(ctx context.Context) (game.DeployOut, error) {
+	if _, err := c.Info(); err != nil {
+		return game.DeployOut{}, err
+	}
+	body, err := c.call(ctx, "Dog", "WithdrawDog", nil)
+	if err != nil {
+		return game.DeployOut{}, err
+	}
+	return decodeWithdraw(body)
+}
+
+func (c *Client) ActivateDog(ctx context.Context, in game.IDIn) (game.Dog, error) {
+	if _, err := c.Info(); err != nil {
+		return game.Dog{}, err
+	}
+	if in.ID <= 0 {
+		return game.Dog{}, fmt.Errorf("id 不能为空")
+	}
+	body, err := c.call(ctx, "Dog", "ActivateDog", encodeLandID(in.ID))
+	if err != nil {
+		return game.Dog{}, err
+	}
+	return decodeActivateDog(body, in.ID)
+}
+
+func (c *Client) Bulletins(ctx context.Context, in game.PageIn) ([]game.Bulletin, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "BulletinBoard", "GetBulletinList", encodePage(in.From, in.Count, 20))
+	if err != nil {
+		return nil, err
+	}
+	return decodeBulletins(body)
+}
+
+func (c *Client) ReadBulletin(ctx context.Context, in game.IDIn) (game.BulletinDetail, error) {
+	if _, err := c.Info(); err != nil {
+		return game.BulletinDetail{}, err
+	}
+	if in.ID <= 0 {
+		return game.BulletinDetail{}, fmt.Errorf("id 不能为空")
+	}
+	body, err := c.call(ctx, "BulletinBoard", "GetBulletinDetail", encodeLandID(in.ID))
+	if err != nil {
+		return game.BulletinDetail{}, err
+	}
+	return decodeBulletinDetail(body)
+}
+
+func (c *Client) Mutants(ctx context.Context) ([]game.Mutant, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Mutant", "ReadMutantBook", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeMutants(body)
+}
+
+func (c *Client) Career(ctx context.Context) (game.Career, error) {
+	if _, err := c.Info(); err != nil {
+		return game.Career{}, err
+	}
+	body, err := c.call(ctx, "Career", "CareerInfoGet", nil)
+	if err != nil {
+		return game.Career{}, err
+	}
+	return decodeCareer(body)
+}
+
+func (c *Client) Ranks(ctx context.Context, in game.RankIn) (game.RankBoard, error) {
+	if _, err := c.Info(); err != nil {
+		return game.RankBoard{}, err
+	}
+	body, err := c.call(ctx, "Rank", "GetRankList", encodeRank(in.Type, in.Page))
+	if err != nil {
+		return game.RankBoard{}, err
+	}
+	return decodeRankBoard(body)
+}
+
+func (c *Client) Avatars(ctx context.Context, in game.TypeIn) ([]game.Avatar, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "AvatarFrame", "AvatarFramesOwned", encodeAvatarOwned(in.Type))
+	if err != nil {
+		return nil, err
+	}
+	return decodeAvatars(body)
+}
+
+func (c *Client) EquippedAvatars(ctx context.Context) ([]game.Avatar, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "AvatarFrame", "AvatarFramesEquiped", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeAvatars(body)
+}
+
+func (c *Client) EquipAvatar(ctx context.Context, in game.AvatarEquipIn) (game.Avatar, error) {
+	if _, err := c.Info(); err != nil {
+		return game.Avatar{}, err
+	}
+	if !in.Off && in.ID <= 0 {
+		return game.Avatar{}, fmt.Errorf("id 不能为空")
+	}
+	body, err := c.call(ctx, "AvatarFrame", "UpdateEquip", encodeAvatarEquip(in.ID, in.Off))
+	if err != nil {
+		return game.Avatar{}, err
+	}
+	return decodeEquippedAvatar(body)
+}
+
+func (c *Client) Skins(ctx context.Context) ([]game.Skin, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Skin", "SkinsOwned", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeSkins(body)
+}
+
+func (c *Client) EquippedSkins(ctx context.Context) ([]game.Skin, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Skin", "SkinsEquipped", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeSkins(body)
+}
+
+func (c *Client) EquipSkin(ctx context.Context, in game.SkinEquipIn) error {
+	if _, err := c.Info(); err != nil {
+		return err
+	}
+	_, err := c.call(ctx, "Skin", "UpdateEquip", encodeSkinEquip(in.Current, in.ID))
+	return err
+}
+
+func (c *Client) Drops(ctx context.Context) ([]game.Drop, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "RandomDrop", "GetActivityInfo", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeDrops(body)
+}
+
+func (c *Client) SolarTerms(ctx context.Context) ([]game.SolarTerm, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "SolarTerms", "GetSolarTerms", nil)
+	if err != nil {
+		return nil, err
+	}
+	return decodeSolarTerms(body)
+}
+
+func (c *Client) ClaimSolar(ctx context.Context, in game.IDIn) ([]game.Item, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	if in.ID <= 0 {
+		return nil, fmt.Errorf("id 不能为空")
+	}
+	body, err := c.call(ctx, "SolarTerms", "ClaimSolarTerms", encodeLandID(in.ID))
+	if err != nil {
+		return nil, err
+	}
+	items, err := decodeItemsAt(body, 1)
+	if err != nil {
+		return nil, err
+	}
+	_, _ = c.Bag(ctx)
+	return items, nil
+}
+
+func (c *Client) ClaimAllSolar(ctx context.Context) ([]game.Item, error) {
+	list, err := c.SolarTerms(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Item
+	for _, s := range list {
+		if s.Status != 2 || s.ID <= 0 {
+			continue
+		}
+		items, err := c.ClaimSolar(ctx, game.IDIn{ID: s.ID})
+		if err != nil {
+			return out, err
+		}
+		out = append(out, items...)
+	}
+	return out, nil
+}
+
+func (c *Client) AchieveView(ctx context.Context, in game.AchieveIn) (game.AchieveScope, error) {
+	if _, err := c.Info(); err != nil {
+		return game.AchieveScope{}, err
+	}
+	body, err := c.call(ctx, "Achieve", "GetScopeView", encodeAchieve(in.Kind, in.ID))
+	if err != nil {
+		return game.AchieveScope{}, err
+	}
+	return decodeAchieveScope(body)
+}
+
+func (c *Client) ClaimAchieveGoal(ctx context.Context, in game.AchieveGoalIn) ([]game.Item, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	if in.GoalID <= 0 {
+		return nil, fmt.Errorf("goal_id 不能为空")
+	}
+	body, err := c.call(ctx, "Achieve", "ClaimGoalReward", encodeAchieveGoal(in.Kind, in.ID, in.GoalID))
+	if err != nil {
+		return nil, err
+	}
+	items, err := decodeItemsAt(body, 1)
+	if err != nil {
+		return nil, err
+	}
+	_, _ = c.Bag(ctx)
+	return items, nil
+}
+
+func (c *Client) ClaimAchieveLevel(ctx context.Context, in game.AchieveIn) ([]game.Item, error) {
+	if _, err := c.Info(); err != nil {
+		return nil, err
+	}
+	body, err := c.call(ctx, "Achieve", "ClaimScopeLevel", encodeAchieve(in.Kind, in.ID))
+	if err != nil {
+		return nil, err
+	}
+	items, err := decodeItemsAt(body, 1)
+	if err != nil {
+		return nil, err
+	}
+	_, _ = c.Bag(ctx)
+	return items, nil
+}
+
 func (c *Client) Season(ctx context.Context) (game.Season, error) {
 	if _, err := c.Info(); err != nil {
 		return game.Season{}, err

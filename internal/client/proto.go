@@ -168,6 +168,78 @@ func encodeLandID(landID int64) []byte {
 	return req.Bytes()
 }
 
+func encodePage(from, count, fallback int64) []byte {
+	if count <= 0 {
+		count = fallback
+	}
+	req := pb.NewEncoder()
+	req.Int(1, from)
+	req.Int(2, count)
+	return req.Bytes()
+}
+
+func encodeFeed(foodID, count int64) []byte {
+	if count <= 0 {
+		count = 1
+	}
+	req := pb.NewEncoder()
+	req.Int(1, foodID)
+	req.Int(2, count)
+	return req.Bytes()
+}
+
+func encodeRank(typ, page int64) []byte {
+	if typ <= 0 {
+		typ = 1
+	}
+	if page <= 0 {
+		page = 1
+	}
+	req := pb.NewEncoder()
+	req.Int(1, typ)
+	req.Int(2, page)
+	return req.Bytes()
+}
+
+func encodeAvatarOwned(typ int64) []byte {
+	req := pb.NewEncoder()
+	req.Int(1, typ)
+	return req.Bytes()
+}
+
+func encodeAvatarEquip(id int64, off bool) []byte {
+	req := pb.NewEncoder()
+	req.Int(1, id)
+	if off {
+		req.Varint(2, 0)
+	} else {
+		req.Bool(2, true)
+	}
+	return req.Bytes()
+}
+
+func encodeSkinEquip(current, next int64) []byte {
+	req := pb.NewEncoder()
+	req.Int(1, current)
+	req.Varint(2, uint64(next))
+	return req.Bytes()
+}
+
+func encodeAchieve(kind, id int64) []byte {
+	req := pb.NewEncoder()
+	req.Int(1, kind)
+	req.Int(2, id)
+	return req.Bytes()
+}
+
+func encodeAchieveGoal(kind, id, goalID int64) []byte {
+	req := pb.NewEncoder()
+	req.Int(1, goalID)
+	req.Int(2, kind)
+	req.Int(3, id)
+	return req.Bytes()
+}
+
 func encodeFarming(landIDs []int64, hostGID int64) []byte {
 	req := pb.NewEncoder()
 	req.RepeatedVarint(1, landIDs)
@@ -1737,4 +1809,504 @@ func decodeAlbumItem(raw []byte) (game.AlbumItem, error) {
 		}
 	}
 	return it, nil
+}
+
+func decodeDogYard(body []byte) (game.DogYard, error) {
+	var out game.DogYard
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return out, err
+	}
+	for _, f := range fields {
+		switch f.Num {
+		case 1:
+			d, err := decodeDog(f.Bytes)
+			if err != nil {
+				return out, err
+			}
+			out.Dogs = append(out.Dogs, d)
+		case 2:
+			out.Deployed = int64(f.Varint)
+		case 3:
+			out.FoodLeft = int64(f.Varint)
+		case 4:
+			out.FoodMax = int64(f.Varint)
+		case 5:
+			food, err := decodeDogFood(f.Bytes)
+			if err != nil {
+				return out, err
+			}
+			out.Foods = append(out.Foods, food)
+		case 6:
+			out.NewLog = f.Varint != 0
+		case 7:
+			out.Pending = int64(f.Varint)
+		case 8:
+			sk, err := decodeDogSkill(f.Bytes)
+			if err != nil {
+				return out, err
+			}
+			out.Skills = append(out.Skills, sk)
+		}
+	}
+	return out, nil
+}
+
+func decodeDog(raw []byte) (game.Dog, error) {
+	var d game.Dog
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return d, err
+	}
+	d.ID = pb.IntField(m, 1)
+	d.Name = pb.StringField(m, 2)
+	d.Protect = pb.IntField(m, 3)
+	d.Owned = pb.BoolField(m, 6)
+	d.Activated = pb.BoolField(m, 7)
+	d.Price = pb.IntField(m, 8)
+	d.Expire = pb.IntField(m, 9)
+	return d, nil
+}
+
+func decodeDogFood(raw []byte) (game.DogFood, error) {
+	var f game.DogFood
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return f, err
+	}
+	f.ID = pb.IntField(m, 1)
+	f.Seconds = pb.IntField(m, 2)
+	f.Count = pb.IntField(m, 3)
+	return f, nil
+}
+
+func decodeDogSkill(raw []byte) (game.DogSkill, error) {
+	var s game.DogSkill
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return s, err
+	}
+	s.ID = pb.IntField(m, 1)
+	s.Used = pb.IntField(m, 2)
+	s.Max = pb.IntField(m, 3)
+	s.DogID = pb.IntField(m, 4)
+	return s, nil
+}
+
+func decodeProtectLogs(body []byte) ([]game.ProtectLog, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.ProtectLog
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		log, err := decodeProtectLog(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, log)
+	}
+	return out, nil
+}
+
+func decodeProtectLog(raw []byte) (game.ProtectLog, error) {
+	var l game.ProtectLog
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return l, err
+	}
+	l.Level = pb.IntField(m, 1)
+	l.Name = pb.StringField(m, 2)
+	l.Avatar = pb.StringField(m, 3)
+	l.Time = pb.IntField(m, 5)
+	l.Count = pb.IntField(m, 6)
+	l.Gold = pb.IntField(m, 7)
+	l.DogID = pb.IntField(m, 8)
+	l.DogName = pb.StringField(m, 9)
+	l.GID = pb.IntField(m, 10)
+	l.Skill = pb.StringField(m, 17)
+	return l, nil
+}
+
+func decodeFoodLeft(body []byte) (int64, error) {
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return 0, err
+	}
+	return pb.IntField(m, 1), nil
+}
+
+func decodeActivateDog(body []byte, fallbackID int64) (game.Dog, error) {
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return game.Dog{}, err
+	}
+	if len(m[1].Bytes) == 0 {
+		return game.Dog{ID: fallbackID, Activated: true}, nil
+	}
+	return decodeDog(m[1].Bytes)
+}
+
+func decodeWithdraw(body []byte) (game.DeployOut, error) {
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return game.DeployOut{}, err
+	}
+	return game.DeployOut{Previous: pb.IntField(m, 1)}, nil
+}
+
+func decodeDeploy(body []byte) (game.DeployOut, error) {
+	var out game.DeployOut
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return out, err
+	}
+	out.Deployed = pb.IntField(m, 1)
+	out.Previous = pb.IntField(m, 2)
+	return out, nil
+}
+
+func decodeBulletins(body []byte) ([]game.Bulletin, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Bulletin
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		m, err := pb.FieldMap(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, game.Bulletin{
+			ID:     pb.IntField(m, 1),
+			Title:  pb.StringField(m, 2),
+			Read:   pb.BoolField(m, 3),
+			Forced: pb.BoolField(m, 4),
+		})
+	}
+	return out, nil
+}
+
+func decodeBulletinDetail(body []byte) (game.BulletinDetail, error) {
+	var d game.BulletinDetail
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return d, err
+	}
+	d.Title = pb.StringField(m, 1)
+	d.Content = pb.StringField(m, 2)
+	d.Start = pb.StringField(m, 3)
+	d.End = pb.StringField(m, 4)
+	return d, nil
+}
+
+func decodeMutants(body []byte) ([]game.Mutant, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Mutant
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		m, err := pb.FieldMap(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		rewards, err := decodeItemsAt(f.Bytes, 8)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, game.Mutant{
+			ID:       pb.IntField(m, 2),
+			Name:     pb.StringField(m, 4),
+			Type:     pb.IntField(m, 3),
+			FruitID:  pb.IntField(m, 5),
+			PlantID:  pb.IntField(m, 6),
+			Unlocked: pb.BoolField(m, 7),
+			Rewards:  rewards,
+		})
+		if out[len(out)-1].ID == 0 {
+			out[len(out)-1].ID = pb.IntField(m, 1)
+		}
+	}
+	return out, nil
+}
+
+func decodeCareer(body []byte) (game.Career, error) {
+	var c game.Career
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return c, err
+	}
+	items, err := decodeItemsAt(body, 1)
+	if err != nil {
+		return c, err
+	}
+	c.Items = items
+	c.Harvested = pb.IntField(m, 2)
+	c.Stolen = pb.IntField(m, 3)
+	c.Name = pb.StringField(m, 4)
+	c.Avatar = pb.StringField(m, 5)
+	c.Signature = pb.StringField(m, 7)
+	c.Level = pb.IntField(m, 9)
+	c.Exp = pb.IntField(m, 10)
+	c.GID = pb.IntField(m, 11)
+	return c, nil
+}
+
+func decodeRankBoard(body []byte) (game.RankBoard, error) {
+	var out game.RankBoard
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return out, err
+	}
+	for _, f := range fields {
+		switch f.Num {
+		case 1:
+			m, err := pb.FieldMap(f.Bytes)
+			if err != nil {
+				return out, err
+			}
+			out.Items = append(out.Items, game.RankItem{
+				GID:    pb.IntField(m, 1),
+				Name:   pb.StringField(m, 2),
+				Value:  pb.IntField(m, 3),
+				Rank:   pb.IntField(m, 4),
+				Avatar: pb.StringField(m, 5),
+				Level:  pb.IntField(m, 6),
+			})
+		case 2:
+			out.Total = int64(f.Varint)
+		}
+	}
+	return out, nil
+}
+
+func decodeAvatars(body []byte) ([]game.Avatar, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Avatar
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		a, err := decodeAvatar(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, a)
+	}
+	return out, nil
+}
+
+func decodeAvatar(raw []byte) (game.Avatar, error) {
+	var a game.Avatar
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return a, err
+	}
+	a.ID = pb.IntField(m, 1)
+	a.Type = pb.IntField(m, 2)
+	a.Count = pb.IntField(m, 3)
+	a.New = pb.BoolField(m, 5)
+	a.Expire = pb.IntField(m, 6)
+	return a, nil
+}
+
+func decodeEquippedAvatar(body []byte) (game.Avatar, error) {
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return game.Avatar{}, err
+	}
+	if len(m[1].Bytes) == 0 {
+		return game.Avatar{}, nil
+	}
+	return decodeAvatar(m[1].Bytes)
+}
+
+func decodeSkins(body []byte) ([]game.Skin, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Skin
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		m, err := pb.FieldMap(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, game.Skin{
+			ID:       pb.IntField(m, 1),
+			Slot:     pb.IntField(m, 2),
+			Equipped: pb.IntField(m, 3) != 0,
+			Expire:   pb.IntField(m, 4),
+		})
+	}
+	return out, nil
+}
+
+func decodeDrops(body []byte) ([]game.Drop, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.Drop
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		d, err := decodeDrop(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, nil
+}
+
+func decodeDrop(raw []byte) (game.Drop, error) {
+	var d game.Drop
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return d, err
+	}
+	d.ID = pb.IntField(m, 1)
+	d.Name = pb.StringField(m, 2)
+	d.Status = pb.IntField(m, 3)
+	d.Start = pb.IntField(m, 4)
+	d.End = pb.IntField(m, 5)
+	d.Dropped = pb.IntField(m, 7)
+	d.Limit = pb.IntField(m, 8)
+	rewards, err := pb.Walk(raw)
+	if err != nil {
+		return d, err
+	}
+	for _, f := range rewards {
+		if f.Num != 6 {
+			continue
+		}
+		rm, err := pb.FieldMap(f.Bytes)
+		if err != nil {
+			return d, err
+		}
+		d.Rewards = append(d.Rewards, game.DropReward{
+			ID:      pb.IntField(rm, 1),
+			Count:   pb.IntField(rm, 2),
+			Chance:  pb.IntField(rm, 3),
+			Claimed: pb.BoolField(rm, 4),
+		})
+	}
+	return d, nil
+}
+
+func decodeSolarTerms(body []byte) ([]game.SolarTerm, error) {
+	fields, err := pb.Walk(body)
+	if err != nil {
+		return nil, err
+	}
+	var out []game.SolarTerm
+	for _, f := range fields {
+		if f.Num != 1 {
+			continue
+		}
+		s, err := decodeSolarTerm(f.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, s)
+	}
+	return out, nil
+}
+
+func decodeSolarTerm(raw []byte) (game.SolarTerm, error) {
+	var s game.SolarTerm
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		return s, err
+	}
+	s.ID = pb.IntField(m, 1)
+	s.Status = pb.IntField(m, 2)
+	s.Start = pb.IntField(m, 3)
+	s.End = pb.IntField(m, 4)
+	s.Name = pb.StringField(m, 6)
+	rewards, err := decodeItemsAt(raw, 5)
+	if err != nil {
+		return s, err
+	}
+	s.Rewards = rewards
+	return s, nil
+}
+
+func decodeAchieveScope(body []byte) (game.AchieveScope, error) {
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return game.AchieveScope{}, err
+	}
+	if len(m[1].Bytes) == 0 {
+		return game.AchieveScope{}, nil
+	}
+	return decodeScopeView(m[1].Bytes)
+}
+
+func decodeScopeView(raw []byte) (game.AchieveScope, error) {
+	var s game.AchieveScope
+	top, err := pb.FieldMap(raw)
+	if err != nil {
+		return s, err
+	}
+	s.Kind = pb.IntField(top, 1)
+	s.ID = pb.IntField(top, 2)
+	s.Level = pb.IntField(top, 3)
+	s.Exp = pb.IntField(top, 4)
+	s.Next = pb.IntField(top, 5)
+	s.Claimed = pb.IntField(top, 8)
+	fields, err := pb.Walk(raw)
+	if err != nil {
+		return s, err
+	}
+	for _, f := range fields {
+		switch f.Num {
+		case 6:
+			gm, err := pb.FieldMap(f.Bytes)
+			if err != nil {
+				return s, err
+			}
+			s.Goals = append(s.Goals, game.AchieveGoal{
+				ID:       pb.IntField(gm, 1),
+				Progress: pb.IntField(gm, 3),
+				Total:    pb.IntField(gm, 4),
+				Claimed:  pb.BoolField(gm, 5),
+				Desc:     pb.StringField(gm, 11),
+			})
+		case 7:
+			lm, err := pb.FieldMap(f.Bytes)
+			if err != nil {
+				return s, err
+			}
+			rewards, err := decodeItemsAt(f.Bytes, 3)
+			if err != nil {
+				return s, err
+			}
+			s.Levels = append(s.Levels, game.AchieveLevel{
+				Level:   pb.IntField(lm, 1),
+				Need:    pb.IntField(lm, 2),
+				Claimed: pb.BoolField(lm, 4),
+				Rewards: rewards,
+			})
+		}
+	}
+	return s, nil
 }

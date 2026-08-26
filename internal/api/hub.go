@@ -610,6 +610,206 @@ func (h *Hub) ClaimAlbum(ctx context.Context, in game.AlbumIn) ([]game.Item, err
 	return s.ClaimAlbum(ctx, in)
 }
 
+func (h *Hub) Dog(ctx context.Context) (game.DogYard, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.DogYard{}, err
+	}
+	return s.Dog(ctx)
+}
+
+func (h *Hub) Feed(ctx context.Context, in game.FeedIn) (int64, error) {
+	s, err := h.current()
+	if err != nil {
+		return 0, err
+	}
+	return s.Feed(ctx, in)
+}
+
+func (h *Hub) ClaimDogGifts(ctx context.Context) ([]game.Item, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.ClaimDogGifts(ctx)
+}
+
+func (h *Hub) DogLogs(ctx context.Context, in game.PageIn) ([]game.ProtectLog, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.DogLogs(ctx, in)
+}
+
+func (h *Hub) DeployDog(ctx context.Context, in game.IDIn) (game.DeployOut, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.DeployOut{}, err
+	}
+	return s.DeployDog(ctx, in)
+}
+
+func (h *Hub) WithdrawDog(ctx context.Context) (game.DeployOut, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.DeployOut{}, err
+	}
+	return s.WithdrawDog(ctx)
+}
+
+func (h *Hub) ActivateDog(ctx context.Context, in game.IDIn) (game.Dog, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.Dog{}, err
+	}
+	return s.ActivateDog(ctx, in)
+}
+
+func (h *Hub) Bulletins(ctx context.Context, in game.PageIn) ([]game.Bulletin, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.Bulletins(ctx, in)
+}
+
+func (h *Hub) ReadBulletin(ctx context.Context, in game.IDIn) (game.BulletinDetail, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.BulletinDetail{}, err
+	}
+	return s.ReadBulletin(ctx, in)
+}
+
+func (h *Hub) Mutants(ctx context.Context) ([]game.Mutant, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.Mutants(ctx)
+}
+
+func (h *Hub) Career(ctx context.Context) (game.Career, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.Career{}, err
+	}
+	return s.Career(ctx)
+}
+
+func (h *Hub) Ranks(ctx context.Context, in game.RankIn) (game.RankBoard, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.RankBoard{}, err
+	}
+	return s.Ranks(ctx, in)
+}
+
+func (h *Hub) Avatars(ctx context.Context, in game.TypeIn) ([]game.Avatar, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.Avatars(ctx, in)
+}
+
+func (h *Hub) EquippedAvatars(ctx context.Context) ([]game.Avatar, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.EquippedAvatars(ctx)
+}
+
+func (h *Hub) EquipAvatar(ctx context.Context, in game.AvatarEquipIn) (game.Avatar, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.Avatar{}, err
+	}
+	return s.EquipAvatar(ctx, in)
+}
+
+func (h *Hub) Skins(ctx context.Context) ([]game.Skin, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.Skins(ctx)
+}
+
+func (h *Hub) EquippedSkins(ctx context.Context) ([]game.Skin, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.EquippedSkins(ctx)
+}
+
+func (h *Hub) EquipSkin(ctx context.Context, in game.SkinEquipIn) error {
+	s, err := h.current()
+	if err != nil {
+		return err
+	}
+	return s.EquipSkin(ctx, in)
+}
+
+func (h *Hub) Drops(ctx context.Context) ([]game.Drop, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.Drops(ctx)
+}
+
+func (h *Hub) SolarTerms(ctx context.Context) ([]game.SolarTerm, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.SolarTerms(ctx)
+}
+
+func (h *Hub) ClaimSolar(ctx context.Context, in game.IDIn) ([]game.Item, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.ClaimSolar(ctx, in)
+}
+
+func (h *Hub) ClaimAllSolar(ctx context.Context) ([]game.Item, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.ClaimAllSolar(ctx)
+}
+
+func (h *Hub) AchieveView(ctx context.Context, in game.AchieveIn) (game.AchieveScope, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.AchieveScope{}, err
+	}
+	return s.AchieveView(ctx, in)
+}
+
+func (h *Hub) ClaimAchieveGoal(ctx context.Context, in game.AchieveGoalIn) ([]game.Item, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.ClaimAchieveGoal(ctx, in)
+}
+
+func (h *Hub) ClaimAchieveLevel(ctx context.Context, in game.AchieveIn) ([]game.Item, error) {
+	s, err := h.current()
+	if err != nil {
+		return nil, err
+	}
+	return s.ClaimAchieveLevel(ctx, in)
+}
+
 func failCode(err error) (int, string) {
 	if err == nil {
 		return 0, "ok"

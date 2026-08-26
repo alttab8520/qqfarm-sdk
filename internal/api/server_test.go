@@ -166,6 +166,77 @@ func (f *fakeSession) Album(context.Context, game.AlbumIn) (game.Album, error) {
 func (f *fakeSession) ClaimAlbum(context.Context, game.AlbumIn) ([]game.Item, error) {
 	return f.items, nil
 }
+func (f *fakeSession) Dog(context.Context) (game.DogYard, error) {
+	return game.DogYard{Deployed: 1, FoodLeft: 60}, nil
+}
+func (f *fakeSession) Feed(context.Context, game.FeedIn) (int64, error) { return 120, nil }
+func (f *fakeSession) ClaimDogGifts(context.Context) ([]game.Item, error) {
+	return f.items, nil
+}
+func (f *fakeSession) DogLogs(context.Context, game.PageIn) ([]game.ProtectLog, error) {
+	return []game.ProtectLog{{GID: 2, Name: "贼"}}, nil
+}
+func (f *fakeSession) DeployDog(context.Context, game.IDIn) (game.DeployOut, error) {
+	return game.DeployOut{Deployed: 1}, nil
+}
+func (f *fakeSession) WithdrawDog(context.Context) (game.DeployOut, error) {
+	return game.DeployOut{Previous: 1}, nil
+}
+func (f *fakeSession) ActivateDog(_ context.Context, in game.IDIn) (game.Dog, error) {
+	return game.Dog{ID: in.ID, Activated: true}, nil
+}
+func (f *fakeSession) Bulletins(context.Context, game.PageIn) ([]game.Bulletin, error) {
+	return []game.Bulletin{{ID: 1, Title: "告"}}, nil
+}
+func (f *fakeSession) ReadBulletin(context.Context, game.IDIn) (game.BulletinDetail, error) {
+	return game.BulletinDetail{Title: "告", Content: "文"}, nil
+}
+func (f *fakeSession) Mutants(context.Context) ([]game.Mutant, error) {
+	return []game.Mutant{{ID: 1, Unlocked: true}}, nil
+}
+func (f *fakeSession) Career(context.Context) (game.Career, error) {
+	return game.Career{Name: "测", Harvested: 3}, nil
+}
+func (f *fakeSession) Ranks(context.Context, game.RankIn) (game.RankBoard, error) {
+	return game.RankBoard{Items: []game.RankItem{{GID: 1, Rank: 1}}}, nil
+}
+func (f *fakeSession) Avatars(context.Context, game.TypeIn) ([]game.Avatar, error) {
+	return []game.Avatar{{ID: 1}}, nil
+}
+func (f *fakeSession) EquippedAvatars(context.Context) ([]game.Avatar, error) {
+	return []game.Avatar{{ID: 1}}, nil
+}
+func (f *fakeSession) EquipAvatar(_ context.Context, in game.AvatarEquipIn) (game.Avatar, error) {
+	return game.Avatar{ID: in.ID}, nil
+}
+func (f *fakeSession) Skins(context.Context) ([]game.Skin, error) {
+	return []game.Skin{{ID: 1}}, nil
+}
+func (f *fakeSession) EquippedSkins(context.Context) ([]game.Skin, error) {
+	return []game.Skin{{ID: 1, Equipped: true}}, nil
+}
+func (f *fakeSession) EquipSkin(context.Context, game.SkinEquipIn) error { return nil }
+func (f *fakeSession) Drops(context.Context) ([]game.Drop, error) {
+	return []game.Drop{{ID: 1}}, nil
+}
+func (f *fakeSession) SolarTerms(context.Context) ([]game.SolarTerm, error) {
+	return []game.SolarTerm{{ID: 1, Status: 2}}, nil
+}
+func (f *fakeSession) ClaimSolar(context.Context, game.IDIn) ([]game.Item, error) {
+	return f.items, nil
+}
+func (f *fakeSession) ClaimAllSolar(context.Context) ([]game.Item, error) {
+	return f.items, nil
+}
+func (f *fakeSession) AchieveView(context.Context, game.AchieveIn) (game.AchieveScope, error) {
+	return game.AchieveScope{ID: 1}, nil
+}
+func (f *fakeSession) ClaimAchieveGoal(context.Context, game.AchieveGoalIn) ([]game.Item, error) {
+	return f.items, nil
+}
+func (f *fakeSession) ClaimAchieveLevel(context.Context, game.AchieveIn) ([]game.Item, error) {
+	return f.items, nil
+}
 func (f *fakeSession) Signin(context.Context, game.ActivityOpIn) ([]game.Item, error) {
 	return f.items, nil
 }
@@ -380,6 +451,26 @@ func TestBagAfterLogin(t *testing.T) {
 	out = post(t, mux, "/Activity/Lottery", game.LotteryIn{ID: 1, HostGID: 9})
 	if out.Code != 0 {
 		t.Fatalf("lottery %+v", out)
+	}
+	out = post(t, mux, "/Dog/Info", nil)
+	if out.Code != 0 {
+		t.Fatalf("dog %+v", out)
+	}
+	out = post(t, mux, "/Bulletin/List", nil)
+	if out.Code != 0 {
+		t.Fatalf("bulletin %+v", out)
+	}
+	out = post(t, mux, "/Career/Info", nil)
+	if out.Code != 0 {
+		t.Fatalf("career %+v", out)
+	}
+	out = post(t, mux, "/Rank/List", nil)
+	if out.Code != 0 {
+		t.Fatalf("rank %+v", out)
+	}
+	out = post(t, mux, "/Solar/List", nil)
+	if out.Code != 0 {
+		t.Fatalf("solar %+v", out)
 	}
 }
 

@@ -6,7 +6,7 @@ const openapiYAML = `openapi: 3.0.3
 info:
   title: qqfarm-sdk
   description: 非官方 QQ 农场协议 HTTP SDK。全部 POST，回包 {code,msg,data}。
-  version: 1.3.0
+  version: 1.5.0
 servers:
   - url: http://127.0.0.1:8765
 paths:
@@ -440,6 +440,156 @@ paths:
     post:
       tags: [Album 图鉴]
       summary: 领图鉴奖励
+      responses:
+        "200": { description: OK }
+  /Dog/Info:
+    post:
+      tags: [Dog 护主犬]
+      summary: 狗和狗粮
+      responses:
+        "200": { description: OK }
+  /Dog/Feed:
+    post:
+      tags: [Dog 护主犬]
+      summary: 喂狗粮
+      responses:
+        "200": { description: OK }
+  /Dog/ClaimGifts:
+    post:
+      tags: [Dog 护主犬]
+      summary: 领技能礼物
+      responses:
+        "200": { description: OK }
+  /Dog/Logs:
+    post:
+      tags: [Dog 护主犬]
+      summary: 护院日志
+      responses:
+        "200": { description: OK }
+  /Dog/Deploy:
+    post:
+      tags: [Dog 护主犬]
+      summary: 出战
+      responses:
+        "200": { description: OK }
+  /Dog/Withdraw:
+    post:
+      tags: [Dog 护主犬]
+      summary: 收回
+      responses:
+        "200": { description: OK }
+  /Dog/Activate:
+    post:
+      tags: [Dog 护主犬]
+      summary: 激活已有的狗
+      responses:
+        "200": { description: OK }
+  /Bulletin/List:
+    post:
+      tags: [Bulletin 公告]
+      summary: 公告列表
+      responses:
+        "200": { description: OK }
+  /Bulletin/Read:
+    post:
+      tags: [Bulletin 公告]
+      summary: 公告正文
+      responses:
+        "200": { description: OK }
+  /Mutant/List:
+    post:
+      tags: [Mutant 变异]
+      summary: 变异图鉴
+      responses:
+        "200": { description: OK }
+  /Career/Info:
+    post:
+      tags: [Career 生涯]
+      summary: 生涯统计
+      responses:
+        "200": { description: OK }
+  /Rank/List:
+    post:
+      tags: [Rank 排行]
+      summary: 排行榜
+      responses:
+        "200": { description: OK }
+  /Avatar/Owned:
+    post:
+      tags: [Avatar 头像框]
+      summary: 已有头像框
+      responses:
+        "200": { description: OK }
+  /Avatar/Equipped:
+    post:
+      tags: [Avatar 头像框]
+      summary: 当前头像框
+      responses:
+        "200": { description: OK }
+  /Avatar/Equip:
+    post:
+      tags: [Avatar 头像框]
+      summary: 穿或脱头像框
+      responses:
+        "200": { description: OK }
+  /Skin/Owned:
+    post:
+      tags: [Skin 皮肤]
+      summary: 已有皮肤
+      responses:
+        "200": { description: OK }
+  /Skin/Equipped:
+    post:
+      tags: [Skin 皮肤]
+      summary: 当前皮肤
+      responses:
+        "200": { description: OK }
+  /Skin/Equip:
+    post:
+      tags: [Skin 皮肤]
+      summary: 换皮肤
+      responses:
+        "200": { description: OK }
+  /Drop/List:
+    post:
+      tags: [Drop 掉落]
+      summary: 随机掉落
+      responses:
+        "200": { description: OK }
+  /Solar/List:
+    post:
+      tags: [Solar 节气]
+      summary: 节气列表
+      responses:
+        "200": { description: OK }
+  /Solar/Claim:
+    post:
+      tags: [Solar 节气]
+      summary: 领一个节气
+      responses:
+        "200": { description: OK }
+  /Solar/ClaimAll:
+    post:
+      tags: [Solar 节气]
+      summary: 领完可领节气
+      responses:
+        "200": { description: OK }
+  /Achieve/View:
+    post:
+      tags: [Achieve 成就]
+      summary: 成就域
+      responses:
+        "200": { description: OK }
+  /Achieve/ClaimGoal:
+    post:
+      tags: [Achieve 成就]
+      summary: 领成就目标
+      responses:
+        "200": { description: OK }
+  /Achieve/ClaimLevel:
+    post:
+      tags: [Achieve 成就]
+      summary: 领成就域等级
       responses:
         "200": { description: OK }
 `
