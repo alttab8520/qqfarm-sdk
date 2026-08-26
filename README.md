@@ -1,6 +1,6 @@
 # qqfarm-sdk
 
-非官方 QQ 农场协议 HTTP SDK。Go 实现，别人用任意语言 `POST` 调用。
+非官方 QQ 农场协议 HTTP SDK。Go 实现， `POST` 调用。
 
 启动后打开 `/docs`，接口全部是 `POST /模块/动作`，回包统一：
 
