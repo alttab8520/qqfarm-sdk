@@ -48,6 +48,11 @@ func (e *Encoder) Message(num protowire.Number, inner []byte) {
 	e.BytesField(num, inner)
 }
 
+func (e *Encoder) MessageAlways(num protowire.Number, inner []byte) {
+	e.buf = protowire.AppendTag(e.buf, num, protowire.BytesType)
+	e.buf = protowire.AppendBytes(e.buf, inner)
+}
+
 func (e *Encoder) PackedVarints(num protowire.Number, vs []int64) {
 	if len(vs) == 0 {
 		return
@@ -146,4 +151,31 @@ func StringField(m map[protowire.Number]Field, num protowire.Number) string {
 
 func BoolField(m map[protowire.Number]Field, num protowire.Number) bool {
 	return IntField(m, num) != 0
+}
+
+func PackedInts(raw []byte, num protowire.Number) []int64 {
+	fields, err := Walk(raw)
+	if err != nil {
+		return nil
+	}
+	var out []int64
+	for _, f := range fields {
+		if f.Num != num {
+			continue
+		}
+		if f.Kind == protowire.BytesType {
+			data := f.Bytes
+			for len(data) > 0 {
+				v, n := protowire.ConsumeVarint(data)
+				if n < 0 {
+					break
+				}
+				out = append(out, int64(v))
+				data = data[n:]
+			}
+			continue
+		}
+		out = append(out, int64(f.Varint))
+	}
+	return out
 }

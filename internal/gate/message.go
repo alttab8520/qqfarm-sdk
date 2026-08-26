@@ -13,7 +13,20 @@ var Services = map[string]string{
 	"Plant":  "gamepb.plantpb.PlantService",
 	"Visit":  "gamepb.visitpb.VisitService",
 	"Friend": "gamepb.friendpb.FriendService",
-	"Ace":    "gamepb.acepb.AceService",
+	"Shop":    "gamepb.shoppb.ShopService",
+	"Item":    "gamepb.itempb.ItemService",
+	"Task":     "gamepb.taskpb.TaskService",
+	"Weather":  "gamepb.weatherpb.WeatherService",
+	"Email":    "gamepb.emailpb.EmailService",
+	"Activity": "gamepb.activitypb.ActivityService",
+	"Season":   "gamepb.seasonpb.SeasonService",
+	"Mall":     "gamepb.mallpb.MallService",
+	"Share":        "gamepb.sharepb.ShareService",
+	"RedPacket":    "gamepb.redpacketpb.RedPacketService",
+	"Interact":     "gamepb.interactpb.InteractService",
+	"Illustrated":  "gamepb.illustratedpb.IllustratedService",
+	"MysteryShop":  "gamepb.mysteryshoppb.MysteryShopService",
+	"Ace":          "gamepb.acepb.AceService",
 }
 
 type Message struct {
