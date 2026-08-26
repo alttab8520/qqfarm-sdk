@@ -2,8 +2,6 @@
 
 非官方 QQ 农场协议 HTTP SDK。Go 实现，别人用任意语言 `POST` 调用。
 
-本目录是独立项目，**不是** `qqfarm_v2` 助手。
-
 启动后打开 `/docs`，接口全部是 `POST /模块/动作`，回包统一：
 
 ```json
@@ -25,14 +23,11 @@
 | `POST /Friend/GetList` | 好友列表（未接入） |
 | `POST /Friend/Help` | 帮忙（未接入） |
 
-不做自动巡检、自动买瓶、自动研究。那些属于助手，不属于 SDK。
-
 ## 运行
 
 默认只听本机。
 
 ```text
-cd qqfarm_sdk
 go run .
 ```
 
