@@ -8,20 +8,20 @@
 { "code": 0, "msg": "ok", "data": {} }
 ```
 
-当前只搭好文档和路由骨架，**还没有接游戏长连接**。未实现的接口返回 `code=501`。
+登录后会连游戏网关，接口走真实 RPC。当前请求体加密是直通，正式服可能拒绝，下一步补加密。
 
 ## 范围
 
 | 路径 | 说明 |
 |---|---|
 | `POST /System/Ping` | 探活 |
-| `POST /User/Login` | 登录（未接入） |
-| `POST /User/GetInfo` | 自己资料（未接入） |
-| `POST /Farm/Refresh` | 刷新地块（未接入） |
-| `POST /Farm/Harvest` | 收获（未接入） |
-| `POST /Farm/Plant` | 种植（未接入） |
-| `POST /Friend/GetList` | 好友列表（未接入） |
-| `POST /Friend/Help` | 帮忙（未接入） |
+| `POST /User/Login` | 登录，body: `{"code","open_id"}` |
+| `POST /User/GetInfo` | 自己资料 |
+| `POST /Farm/Refresh` | 刷新地块 |
+| `POST /Farm/Harvest` | 收获，body: `{"land_ids","host_gid","is_all"}` |
+| `POST /Farm/Plant` | 种植，body: `{"seed_id","land_ids"}` |
+| `POST /Friend/GetList` | 好友列表 |
+| `POST /Friend/Help` | 帮忙浇水，body: `{"gid","land_ids"}` |
 
 ## 运行
 
@@ -41,7 +41,7 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 ## 版本
 
-当前 **0.1.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
+当前 **0.2.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
 
 发新版：
 

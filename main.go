@@ -16,7 +16,7 @@ func main() {
 
 	addr := *host + ":" + *port
 	log.Printf("qqfarm-sdk %s http://%s/docs", version.Version, addr)
-	if err := http.ListenAndServe(addr, api.NewMux()); err != nil {
+	if err := http.ListenAndServe(addr, api.NewMux(api.NewHub(nil))); err != nil {
 		log.Fatal(err)
 	}
 }

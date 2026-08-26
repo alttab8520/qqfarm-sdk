@@ -1,62 +1,104 @@
 package api
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/alttab8520/qqfarm-sdk/internal/game"
 )
 
-var stubs = []string{
-	"/User/Login",
-	"/User/GetInfo",
-	"/Farm/Refresh",
-	"/Farm/Harvest",
-	"/Farm/Plant",
-	"/Friend/GetList",
-	"/Friend/Help",
+type fakeSession struct {
+	user    game.User
+	lands   []game.Land
+	items   []game.Item
+	friends []game.Friend
 }
 
-func decode(t *testing.T, rec *httptest.ResponseRecorder) Reply {
-	t.Helper()
-	var body Reply
-	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
-		t.Fatalf("json: %v body=%s", err, rec.Body.String())
+func (f *fakeSession) Login(_ context.Context, in game.LoginIn) (game.User, error) {
+	f.user = game.User{GID: 7, Name: "测", OpenID: in.OpenID}
+	return f.user, nil
+}
+func (f *fakeSession) Info() (game.User, error) {
+	if f.user.GID == 0 {
+		return game.User{}, game.ErrNotLogin
 	}
-	return body
+	return f.user, nil
+}
+func (f *fakeSession) Refresh(context.Context) ([]game.Land, error) {
+	return f.lands, nil
+}
+func (f *fakeSession) Harvest(context.Context, game.HarvestIn) ([]game.Item, error) {
+	return f.items, nil
+}
+func (f *fakeSession) Plant(context.Context, game.PlantIn) error { return nil }
+func (f *fakeSession) Friends(context.Context) ([]game.Friend, error) {
+	return f.friends, nil
+}
+func (f *fakeSession) Help(context.Context, game.HelpIn) error { return nil }
+func (f *fakeSession) Close() error                           { return nil }
+
+func testClient(t *testing.T, sess *fakeSession) *http.ServeMux {
+	t.Helper()
+	return NewMux(NewHub(func() game.Session { return sess }))
+}
+
+func post(t *testing.T, mux *http.ServeMux, path string, body any) Reply {
+	t.Helper()
+	var buf bytes.Buffer
+	if body != nil {
+		_ = json.NewEncoder(&buf).Encode(body)
+	}
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, path, &buf))
+	var out Reply
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatalf("json %v %s", err, rec.Body.String())
+	}
+	return out
 }
 
 func TestPing(t *testing.T) {
-	rec := httptest.NewRecorder()
-	NewMux().ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/System/Ping", nil))
-	if rec.Code != 200 {
-		t.Fatalf("status %d", rec.Code)
-	}
-	body := decode(t, rec)
-	if body.Code != 0 {
-		t.Fatalf("code %d", body.Code)
-	}
-	data, _ := body.Data.(map[string]any)
-	if data["pong"] != true {
-		t.Fatalf("data %#v", body.Data)
+	out := post(t, testClient(t, &fakeSession{}), "/System/Ping", nil)
+	if out.Code != 0 {
+		t.Fatalf("%+v", out)
 	}
 }
 
-func TestStubsNotReady(t *testing.T) {
-	mux := NewMux()
-	for _, path := range stubs {
-		rec := httptest.NewRecorder()
-		mux.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, path, nil))
-		body := decode(t, rec)
-		if rec.Code != 200 || body.Code != 501 || body.Msg != notReadyMsg {
-			t.Fatalf("%s status=%d body=%+v", path, rec.Code, body)
-		}
+func TestLoginRequiresCode(t *testing.T) {
+	out := post(t, testClient(t, &fakeSession{}), "/User/Login", map[string]string{})
+	if out.Code != 400 {
+		t.Fatalf("%+v", out)
+	}
+}
+
+func TestGetInfoRequiresLogin(t *testing.T) {
+	out := post(t, testClient(t, &fakeSession{}), "/User/GetInfo", nil)
+	if out.Code != 401 {
+		t.Fatalf("%+v", out)
+	}
+}
+
+func TestLoginThenInfo(t *testing.T) {
+	mux := testClient(t, &fakeSession{})
+	out := post(t, mux, "/User/Login", game.LoginIn{Code: "abc", OpenID: "o1"})
+	if out.Code != 0 {
+		t.Fatalf("login %+v", out)
+	}
+	out = post(t, mux, "/User/GetInfo", nil)
+	if out.Code != 0 {
+		t.Fatalf("info %+v", out)
 	}
 }
 
 func TestDocs(t *testing.T) {
 	rec := httptest.NewRecorder()
-	NewMux().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/docs", nil))
+	NewMux(NewHub(func() game.Session { return &fakeSession{} })).ServeHTTP(
+		rec, httptest.NewRequest(http.MethodGet, "/docs", nil),
+	)
 	if rec.Code != 200 {
 		t.Fatalf("status %d", rec.Code)
 	}
