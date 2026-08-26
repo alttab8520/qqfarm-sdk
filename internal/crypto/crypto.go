@@ -74,8 +74,10 @@ func findWASM() (string, error) {
 			continue
 		}
 		candidates = append(candidates,
-			filepath.Join(dir, "data", "tsdk-v3.8.2.wasm"),
-			filepath.Join(dir, "tsdk-v3.8.2.wasm"),
+			filepath.Join(dir, "data", "tsdk-v3.9.0.wasm"),
+			filepath.Join(dir, "data", "tsdk.wasm"),
+			filepath.Join(dir, "tsdk-v3.9.0.wasm"),
+			filepath.Join(dir, "tsdk.wasm"),
 		)
 	}
 	for _, p := range candidates {
@@ -83,5 +85,5 @@ func findWASM() (string, error) {
 			return p, nil
 		}
 	}
-	return "", fmt.Errorf("未找到加密运行时，请将 tsdk-v3.8.2.wasm 放到 data/ 或设置 FARM_WASM")
+	return "", fmt.Errorf("未找到加密运行时，请将 tsdk-v3.9.0.wasm 放到 data/ 或设置 FARM_WASM")
 }

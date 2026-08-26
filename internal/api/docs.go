@@ -6,7 +6,7 @@ const openapiYAML = `openapi: 3.0.3
 info:
   title: qqfarm-sdk
   description: 非官方 QQ 农场协议 HTTP SDK。全部 POST，回包 {code,msg,data}。
-  version: 0.3.0
+  version: 0.4.0
 servers:
   - url: http://127.0.0.1:8765
 paths:

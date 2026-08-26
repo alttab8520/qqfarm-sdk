@@ -65,8 +65,10 @@ func TestRuntimeRoundtrip(t *testing.T) {
 	path := os.Getenv("FARM_WASM")
 	if path == "" {
 		for _, p := range []string{
-			filepath.Join("data", "tsdk-v3.8.2.wasm"),
-			"tsdk-v3.8.2.wasm",
+			filepath.Join("data", "tsdk-v3.9.0.wasm"),
+			filepath.Join("data", "tsdk.wasm"),
+			"tsdk-v3.9.0.wasm",
+			"tsdk.wasm",
 		} {
 			if st, err := os.Stat(p); err == nil && st.Size() > 0 {
 				path = p
@@ -75,7 +77,7 @@ func TestRuntimeRoundtrip(t *testing.T) {
 		}
 	}
 	if path == "" {
-		t.Skip("没有 tsdk-v3.8.2.wasm，跳过真实加密测试")
+		t.Skip("没有 tsdk-v3.9.0.wasm，跳过真实加密测试")
 	}
 	rt, err := NewRuntime(path)
 	if err != nil {
