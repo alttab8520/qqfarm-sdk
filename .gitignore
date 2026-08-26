@@ -1,0 +1,6 @@
+/qqfarm-sdk
+/qqfarm-sdk.exe
+*.exe
+__pycache__/
+.idea/
+.vscode/
