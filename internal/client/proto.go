@@ -2,19 +2,27 @@ package client
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/alttab8520/qqfarm-sdk/internal/game"
 	"github.com/alttab8520/qqfarm-sdk/internal/pb"
 )
 
 const (
-	gameVersion = "1.13.3.11_20260826"
-	channelID   = "1256"
+	fallbackGameVersion = "1.13.3.11_20260826"
+	channelID           = "1256"
 )
+
+func gameVersion() string {
+	if v := os.Getenv("FARM_GAME_VER"); v != "" {
+		return v
+	}
+	return fallbackGameVersion
+}
 
 func encodeLogin() []byte {
 	dev := pb.NewEncoder()
-	dev.String(1, gameVersion)
+	dev.String(1, gameVersion())
 	dev.String(2, "Windows Unknown x64")
 	dev.String(5, "wifi")
 	dev.Int(10, 98089)
@@ -59,10 +67,38 @@ func encodeEnter(hostGID int64) []byte {
 }
 
 func encodeWater(landIDs []int64, hostGID int64) []byte {
+	return encodeLandOp(landIDs, hostGID)
+}
+
+func encodeLandOp(landIDs []int64, hostGID int64) []byte {
 	req := pb.NewEncoder()
 	req.RepeatedVarint(1, landIDs)
 	req.Int(2, hostGID)
 	return req.Bytes()
+}
+
+func encodeFertilize(landIDs []int64, fertilizerID int64) []byte {
+	req := pb.NewEncoder()
+	req.RepeatedVarint(1, landIDs)
+	req.Int(2, fertilizerID)
+	return req.Bytes()
+}
+
+func encodeAnti(data []byte) []byte {
+	req := pb.NewEncoder()
+	req.BytesField(1, data)
+	return req.Bytes()
+}
+
+func decodeAnti(body []byte) ([]byte, error) {
+	if len(body) == 0 {
+		return nil, nil
+	}
+	m, err := pb.FieldMap(body)
+	if err != nil {
+		return nil, err
+	}
+	return append([]byte{}, m[1].Bytes...), nil
 }
 
 func decodeUser(body []byte) (game.User, error) {

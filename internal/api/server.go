@@ -33,6 +33,23 @@ func NewMux(hub *Hub) *http.ServeMux {
 		}
 		writeReply(w, OK(user))
 	})
+	mux.HandleFunc("POST /System/Status", func(w http.ResponseWriter, r *http.Request) {
+		st, err := hub.Status()
+		if err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(st))
+	})
+	mux.HandleFunc("POST /User/Logout", func(w http.ResponseWriter, r *http.Request) {
+		if err := hub.Logout(); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
 	mux.HandleFunc("POST /User/GetInfo", func(w http.ResponseWriter, r *http.Request) {
 		user, err := hub.Info()
 		if err != nil {
@@ -72,6 +89,58 @@ func NewMux(hub *Hub) *http.ServeMux {
 			return
 		}
 		if err := hub.Plant(r.Context(), in); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
+	mux.HandleFunc("POST /Farm/Water", func(w http.ResponseWriter, r *http.Request) {
+		var in game.LandOpIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		if err := hub.Water(r.Context(), in); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
+	mux.HandleFunc("POST /Farm/Weed", func(w http.ResponseWriter, r *http.Request) {
+		var in game.LandOpIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		if err := hub.Weed(r.Context(), in); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
+	mux.HandleFunc("POST /Farm/Bug", func(w http.ResponseWriter, r *http.Request) {
+		var in game.LandOpIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		if err := hub.Bug(r.Context(), in); err != nil {
+			code, msg := failCode(err)
+			writeReply(w, Fail(code, msg))
+			return
+		}
+		writeReply(w, OK(nil))
+	})
+	mux.HandleFunc("POST /Farm/Fertilize", func(w http.ResponseWriter, r *http.Request) {
+		var in game.FertilizeIn
+		if err := decodeJSON(r, &in); err != nil {
+			writeReply(w, Fail(400, err.Error()))
+			return
+		}
+		if err := hub.Fertilize(r.Context(), in); err != nil {
 			code, msg := failCode(err)
 			writeReply(w, Fail(code, msg))
 			return

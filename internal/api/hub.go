@@ -95,6 +95,57 @@ func (h *Hub) Help(ctx context.Context, in game.HelpIn) error {
 	return s.Help(ctx, in)
 }
 
+func (h *Hub) Status() (game.Status, error) {
+	s, err := h.current()
+	if err != nil {
+		return game.Status{}, err
+	}
+	return s.Status()
+}
+
+func (h *Hub) Logout() error {
+	h.mu.Lock()
+	s := h.sess
+	h.sess = nil
+	h.mu.Unlock()
+	if s == nil {
+		return game.ErrNotLogin
+	}
+	return s.Close()
+}
+
+func (h *Hub) Water(ctx context.Context, in game.LandOpIn) error {
+	s, err := h.current()
+	if err != nil {
+		return err
+	}
+	return s.Water(ctx, in)
+}
+
+func (h *Hub) Weed(ctx context.Context, in game.LandOpIn) error {
+	s, err := h.current()
+	if err != nil {
+		return err
+	}
+	return s.Weed(ctx, in)
+}
+
+func (h *Hub) Bug(ctx context.Context, in game.LandOpIn) error {
+	s, err := h.current()
+	if err != nil {
+		return err
+	}
+	return s.Bug(ctx, in)
+}
+
+func (h *Hub) Fertilize(ctx context.Context, in game.FertilizeIn) error {
+	s, err := h.current()
+	if err != nil {
+		return err
+	}
+	return s.Fertilize(ctx, in)
+}
+
 func failCode(err error) (int, string) {
 	if err == nil {
 		return 0, "ok"

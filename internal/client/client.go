@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alttab8520/qqfarm-sdk/internal/ace"
 	"github.com/alttab8520/qqfarm-sdk/internal/crypto"
 	"github.com/alttab8520/qqfarm-sdk/internal/game"
 	"github.com/alttab8520/qqfarm-sdk/internal/gate"
@@ -27,6 +28,7 @@ type Client struct {
 	user      game.User
 	loggedIn  bool
 	closed    bool
+	life      *ace.Life
 }
 
 func New() game.Session {
@@ -60,7 +62,7 @@ func (c *Client) Login(ctx context.Context, in game.LoginIn) (game.User, error) 
 	c.mu.Unlock()
 
 	url := fmt.Sprintf("%s?platform=wx&os=Windows&ver=%s&code=%s&openID=%s",
-		wsBase, gameVersion, in.Code, in.OpenID)
+		wsBase, gameVersion(), in.Code, in.OpenID)
 	conn, _, err := websocket.Dial(ctx, url, &websocket.DialOptions{
 		HTTPHeader: http.Header{"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}},
 	})
@@ -92,6 +94,8 @@ func (c *Client) Login(ctx context.Context, in game.LoginIn) (game.User, error) 
 	c.mu.Lock()
 	c.user = user
 	c.loggedIn = true
+	c.life = ace.New(crypto.AsEngine(c.enc), c.uploadAnti)
+	c.life.Start()
 	c.mu.Unlock()
 	return user, nil
 }
@@ -103,6 +107,22 @@ func (c *Client) Info() (game.User, error) {
 		return game.User{}, game.ErrNotLogin
 	}
 	return c.user, nil
+}
+
+func (c *Client) Status() (game.Status, error) {
+	user, err := c.Info()
+	if err != nil {
+		return game.Status{}, err
+	}
+	out := game.Status{LoggedIn: true, User: user}
+	c.mu.Lock()
+	life := c.life
+	c.mu.Unlock()
+	if life != nil {
+		snap := life.Snapshot()
+		out.ACE = game.ACE{Uploads: snap.Uploads, Reports: snap.Reports, Failures: snap.Failures, LastError: snap.LastError}
+	}
+	return out, nil
 }
 
 func (c *Client) Refresh(ctx context.Context) ([]game.Land, error) {
@@ -144,6 +164,42 @@ func (c *Client) Plant(ctx context.Context, in game.PlantIn) error {
 	return err
 }
 
+func (c *Client) Water(ctx context.Context, in game.LandOpIn) error {
+	return c.landOp(ctx, "WaterLand", in)
+}
+
+func (c *Client) Weed(ctx context.Context, in game.LandOpIn) error {
+	return c.landOp(ctx, "WeedOut", in)
+}
+
+func (c *Client) Bug(ctx context.Context, in game.LandOpIn) error {
+	return c.landOp(ctx, "Insecticide", in)
+}
+
+func (c *Client) Fertilize(ctx context.Context, in game.FertilizeIn) error {
+	if _, err := c.Info(); err != nil {
+		return err
+	}
+	if in.FertilizerID <= 0 || len(in.LandIDs) == 0 {
+		return fmt.Errorf("fertilizer_id 和 land_ids 不能为空")
+	}
+	_, err := c.call(ctx, "Plant", "Fertilize", encodeFertilize(in.LandIDs, in.FertilizerID))
+	return err
+}
+
+func (c *Client) landOp(ctx context.Context, method string, in game.LandOpIn) error {
+	user, err := c.Info()
+	if err != nil {
+		return err
+	}
+	host := in.HostGID
+	if host == 0 {
+		host = user.GID
+	}
+	_, err = c.call(ctx, "Plant", method, encodeLandOp(in.LandIDs, host))
+	return err
+}
+
 func (c *Client) Friends(ctx context.Context) ([]game.Friend, error) {
 	if _, err := c.Info(); err != nil {
 		return nil, err
@@ -181,6 +237,8 @@ func (c *Client) Close() error {
 
 func (c *Client) closeConn() error {
 	c.mu.Lock()
+	life := c.life
+	c.life = nil
 	c.closed = true
 	conn := c.conn
 	c.conn = nil
@@ -190,6 +248,9 @@ func (c *Client) closeConn() error {
 		delete(c.pending, seq)
 	}
 	c.mu.Unlock()
+	if life != nil {
+		life.Stop()
+	}
 	if conn != nil {
 		return conn.Close(websocket.StatusNormalClosure, "")
 	}
@@ -240,6 +301,14 @@ func (c *Client) call(ctx context.Context, service, method string, body []byte) 
 		}
 		return msg.Body, nil
 	}
+}
+
+func (c *Client) uploadAnti(data []byte) ([]byte, error) {
+	body, err := c.call(context.Background(), "Ace", "AntiData", encodeAnti(data))
+	if err != nil {
+		return nil, err
+	}
+	return decodeAnti(body)
 }
 
 func (c *Client) readLoop() {

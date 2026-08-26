@@ -19,7 +19,7 @@ func TestEncodeLoginHasSceneAndDevice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(dev[1].Bytes) != gameVersion {
+	if string(dev[1].Bytes) != gameVersion() {
 		t.Fatalf("ver %q", dev[1].Bytes)
 	}
 }
@@ -39,6 +39,17 @@ func TestDecodeUser(t *testing.T) {
 	}
 	if u.GID != 99 || u.Name != "张三" || u.OpenID != "oABC" {
 		t.Fatalf("%+v", u)
+	}
+}
+
+func TestEncodeAnti(t *testing.T) {
+	raw := encodeAnti([]byte{7, 5, 1})
+	m, err := pb.FieldMap(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(m[1].Bytes) != "\x07\x05\x01" {
+		t.Fatalf("%x", m[1].Bytes)
 	}
 }
 

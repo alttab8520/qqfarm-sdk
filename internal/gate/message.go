@@ -13,6 +13,7 @@ var Services = map[string]string{
 	"Plant":  "gamepb.plantpb.PlantService",
 	"Visit":  "gamepb.visitpb.VisitService",
 	"Friend": "gamepb.friendpb.FriendService",
+	"Ace":    "gamepb.acepb.AceService",
 }
 
 type Message struct {

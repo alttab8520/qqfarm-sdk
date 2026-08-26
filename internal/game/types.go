@@ -65,13 +65,41 @@ type HelpIn struct {
 	LandIDs []int64 `json:"land_ids"`
 }
 
+type LandOpIn struct {
+	LandIDs []int64 `json:"land_ids"`
+	HostGID int64   `json:"host_gid"`
+}
+
+type FertilizeIn struct {
+	LandIDs      []int64 `json:"land_ids"`
+	FertilizerID int64   `json:"fertilizer_id"`
+}
+
+type Status struct {
+	LoggedIn bool   `json:"logged_in"`
+	User     User   `json:"user,omitempty"`
+	ACE      ACE    `json:"ace"`
+}
+
+type ACE struct {
+	Uploads   int    `json:"uploads"`
+	Reports   int    `json:"status_reports"`
+	Failures  int    `json:"failures"`
+	LastError string `json:"last_error,omitempty"`
+}
+
 // Session is the live game connection used by HTTP handlers.
 type Session interface {
 	Login(ctx context.Context, in LoginIn) (User, error)
 	Info() (User, error)
+	Status() (Status, error)
 	Refresh(ctx context.Context) ([]Land, error)
 	Harvest(ctx context.Context, in HarvestIn) ([]Item, error)
 	Plant(ctx context.Context, in PlantIn) error
+	Water(ctx context.Context, in LandOpIn) error
+	Weed(ctx context.Context, in LandOpIn) error
+	Bug(ctx context.Context, in LandOpIn) error
+	Fertilize(ctx context.Context, in FertilizeIn) error
 	Friends(ctx context.Context) ([]Friend, error)
 	Help(ctx context.Context, in HelpIn) error
 	Close() error

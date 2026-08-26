@@ -6,7 +6,7 @@ const openapiYAML = `openapi: 3.0.3
 info:
   title: qqfarm-sdk
   description: 非官方 QQ 农场协议 HTTP SDK。全部 POST，回包 {code,msg,data}。
-  version: 0.4.0
+  version: 0.5.0
 servers:
   - url: http://127.0.0.1:8765
 paths:
@@ -22,10 +22,22 @@ paths:
       summary: 登录
       responses:
         "200": { description: OK }
+  /System/Status:
+    post:
+      tags: [System 系统]
+      summary: 登录状态
+      responses:
+        "200": { description: OK }
   /User/GetInfo:
     post:
       tags: [User 用户]
       summary: 自己资料
+      responses:
+        "200": { description: OK }
+  /User/Logout:
+    post:
+      tags: [User 用户]
+      summary: 退出
       responses:
         "200": { description: OK }
   /Farm/Refresh:
@@ -44,6 +56,30 @@ paths:
     post:
       tags: [Farm 农场]
       summary: 种植
+      responses:
+        "200": { description: OK }
+  /Farm/Water:
+    post:
+      tags: [Farm 农场]
+      summary: 浇水
+      responses:
+        "200": { description: OK }
+  /Farm/Weed:
+    post:
+      tags: [Farm 农场]
+      summary: 除草
+      responses:
+        "200": { description: OK }
+  /Farm/Bug:
+    post:
+      tags: [Farm 农场]
+      summary: 杀虫
+      responses:
+        "200": { description: OK }
+  /Farm/Fertilize:
+    post:
+      tags: [Farm 农场]
+      summary: 施肥
       responses:
         "200": { description: OK }
   /Friend/GetList:

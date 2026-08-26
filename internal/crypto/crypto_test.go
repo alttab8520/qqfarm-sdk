@@ -109,4 +109,10 @@ func TestRuntimeRoundtrip(t *testing.T) {
 	if len(cred) < 140 {
 		t.Fatalf("初始化凭据太短: %d", len(cred))
 	}
+	if err := rt.Heartbeat(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := rt.PullAnti(); err != nil {
+		t.Fatal(err)
+	}
 }

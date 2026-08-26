@@ -35,6 +35,12 @@ const (
 	expEncrypt       = "ba"
 	expMemory        = "w"
 	expTouchSet      = "ha"
+	expHeartbeat     = "M"
+	expPullAnti      = "N"
+	expPushAnti      = "O"
+	expProcess       = "P"
+	expSendStatus    = "E"
+	expSpeedHack     = "fa"
 )
 
 var mergedDataSegments = [][2]int{

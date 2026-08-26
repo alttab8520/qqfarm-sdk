@@ -39,7 +39,24 @@ func (f *fakeSession) Friends(context.Context) ([]game.Friend, error) {
 	return f.friends, nil
 }
 func (f *fakeSession) Help(context.Context, game.HelpIn) error { return nil }
-func (f *fakeSession) Close() error                           { return nil }
+func (f *fakeSession) Water(context.Context, game.LandOpIn) error {
+	return nil
+}
+func (f *fakeSession) Weed(context.Context, game.LandOpIn) error { return nil }
+func (f *fakeSession) Bug(context.Context, game.LandOpIn) error  { return nil }
+func (f *fakeSession) Fertilize(context.Context, game.FertilizeIn) error {
+	return nil
+}
+func (f *fakeSession) Status() (game.Status, error) {
+	if f.user.GID == 0 {
+		return game.Status{}, game.ErrNotLogin
+	}
+	return game.Status{LoggedIn: true, User: f.user}, nil
+}
+func (f *fakeSession) Close() error {
+	f.user = game.User{}
+	return nil
+}
 
 func testClient(t *testing.T, sess *fakeSession) *http.ServeMux {
 	t.Helper()
@@ -91,6 +108,26 @@ func TestLoginThenInfo(t *testing.T) {
 	out = post(t, mux, "/User/GetInfo", nil)
 	if out.Code != 0 {
 		t.Fatalf("info %+v", out)
+	}
+}
+
+func TestStatusRequiresLogin(t *testing.T) {
+	out := post(t, testClient(t, &fakeSession{}), "/System/Status", nil)
+	if out.Code != 401 {
+		t.Fatalf("%+v", out)
+	}
+}
+
+func TestLogout(t *testing.T) {
+	mux := testClient(t, &fakeSession{})
+	if out := post(t, mux, "/User/Login", game.LoginIn{Code: "abc", OpenID: "o1"}); out.Code != 0 {
+		t.Fatalf("login %+v", out)
+	}
+	if out := post(t, mux, "/User/Logout", nil); out.Code != 0 {
+		t.Fatalf("logout %+v", out)
+	}
+	if out := post(t, mux, "/User/GetInfo", nil); out.Code != 401 {
+		t.Fatalf("after logout %+v", out)
 	}
 }
 
