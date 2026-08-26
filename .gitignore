@@ -2,6 +2,7 @@
 /qqfarm-sdk.exe
 *.exe
 *.wasm
+!data/tsdk-v3.9.0.wasm
 __pycache__/
 .idea/
 .vscode/
