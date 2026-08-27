@@ -17,12 +17,12 @@ type Engine interface {
 
 type noopEngine struct{}
 
-func (noopEngine) Heartbeat() error                  { return nil }
-func (noopEngine) ProcessReceived() error            { return nil }
-func (noopEngine) SendStatus() error                 { return nil }
-func (noopEngine) DetectSpeedHack(int) error         { return nil }
-func (noopEngine) PullAnti() ([]byte, error)         { return nil, nil }
-func (noopEngine) PushAnti([]byte) error             { return nil }
+func (noopEngine) Heartbeat() error          { return nil }
+func (noopEngine) ProcessReceived() error    { return nil }
+func (noopEngine) SendStatus() error         { return nil }
+func (noopEngine) DetectSpeedHack(int) error { return nil }
+func (noopEngine) PullAnti() ([]byte, error) { return nil, nil }
+func (noopEngine) PushAnti([]byte) error     { return nil }
 
 func AsEngine(enc Encryptor) Engine {
 	if e, ok := enc.(Engine); ok {

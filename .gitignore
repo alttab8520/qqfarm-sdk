@@ -4,6 +4,7 @@
 yyb_data/
 *.wasm
 !data/tsdk-v3.9.0.wasm
+data/resources.json
 __pycache__/
 .idea/
 .vscode/

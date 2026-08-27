@@ -30,20 +30,20 @@ type Life struct {
 	upload Uploader
 	clock  func() time.Time
 
-	mu           sync.Mutex
-	stop         chan struct{}
-	running      bool
-	inFlight     bool
-	nextProcess  time.Time
-	nextHeart    time.Time
-	nextPoll     time.Time
-	nextSpeed    time.Time
-	nextStatus   time.Time
-	lastSpeed    time.Time
-	uploads      int
-	reports      int
-	failures     int
-	lastError    string
+	mu          sync.Mutex
+	stop        chan struct{}
+	running     bool
+	inFlight    bool
+	nextProcess time.Time
+	nextHeart   time.Time
+	nextPoll    time.Time
+	nextSpeed   time.Time
+	nextStatus  time.Time
+	lastSpeed   time.Time
+	uploads     int
+	reports     int
+	failures    int
+	lastError   string
 }
 
 func New(host crypto.Engine, upload Uploader) *Life {

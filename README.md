@@ -21,6 +21,10 @@
 
 | 字段 | 含义 |
 |---|---|
+回包里的 ID 都是裸数字。想知道 `20001` 是什么，用 `POST /Resource/Lookup`，见下面的「资源表」。
+
+| 字段 | 含义 |
+|---|---|
 | `gid` | 游戏内用户 ID |
 | `host_gid` | 目标农场主人。不填或 `0` 是自己 |
 | `land_ids` | 地块编号 |
@@ -69,6 +73,57 @@
 | `failures` | 连续失败次数 |
 | `last_error` | 最近一次错误 |
 
+
+### 资源表
+
+官方配表，把回包里的裸 ID 翻成名字。不用登录也能查。
+
+内置一份随 SDK 发布的快照（游戏包 59，50 张表 2000 多行，带官方 CDN 图片地址），`POST /Resource/Refresh` 可以从官方 CDN 拉最新的，落到 `data/resources.json`，下次启动优先读它。路径可用 `FARM_RES` 改。
+
+| 路径 | 说明 |
+|---|---|
+| `POST /Resource/Tables` | 有哪些表、各多少行。先看这个 |
+| `POST /Resource/Lookup` | 按 ID 查，body: `{"ids","table"}`。`table` 可选，用来收窄 |
+| `POST /Resource/Items` | 列配表，body: `{"table","type","keyword","offset","limit"}`。`limit` 默认 200 |
+| `POST /Resource/Refresh` | 从官方 CDN 拉最新，body 可带 `{"bundle_vers"}` |
+
+同一个 ID 在不同表里含义不同，所以 `Lookup` 回的是数组：
+
+```text
+curl -X POST http://127.0.0.1:8765/Resource/Lookup -d "{\"ids\":[20001],\"table\":\"ItemInfo\"}"
+# {"id":20001,"table":"ItemInfo","name":"草莓种子","type":"5","desc":"种植后，可以收获一定数量的草莓。"}
+```
+
+常用几张：
+
+| 表 | 用来查 |
+|---|---|
+| `ItemInfo` | 所有物品。`items[].id`、`item_id`、`seed_id` 都在这。种子是 `type=5` |
+| `Plant` | 作物。`extra` 带 `seed_id` / `fruit_id` / `land_level_need` / `exp`，能按等级挑种子 |
+| `Goods` | 货架商品。`goods_id` → `item_id` / `price_id`，配合 `Shop/Buy` |
+| `SkinCfg` / `AvatarFrame` | 皮肤、头像框 |
+
+`type` 统一是字符串：有的表用数字，有的表直接写中文。
+
+`icon_url` 是官方 CDN 上的图，直接能下：
+
+```text
+curl -X POST http://127.0.0.1:8765/Resource/Lookup -d "{\"ids\":[1001],\"table\":\"ItemInfo\"}"
+# icon_url: https://cdn-resource.nqf.qq.com/release/remote/extraRes/native/65/65088be3-....b8ce8.png
+```
+
+2060 行里 846 行有图，物品表覆盖 702/723。种子拿的是种子袋图，果实拿成熟立绘，两张不一样；只有琉璃宝荷、新春红包、星语铃花这三株游戏里本来就共用一张。图不在配表里，是按资源 uuid 去 `extraRes` / `plant` / `petdog` 这几个 bundle 的清单里解出来的，`Refresh` 会一并重算。
+
+`extra` 是该行剩下的字段，也保留了原始资源引用 `icon_res` / `asset_name` / `icon_asset`，那是游戏内路径，要自己寻址时用。spine 骨骼、粒子特效、动画片段、音效、坐标缩放这些纯渲染字段不收。
+
+游戏更新后内置表会过期。新版的资源哈希在游戏包的 `settings.*.json` 里，取 `assets.bundleVers` 的 `mainscene` 和 `delayRes`，传给 `Refresh`：
+
+```text
+curl -X POST http://127.0.0.1:8765/Resource/Refresh \
+  -d "{\"bundle_vers\":{\"mainscene\":\"eab4a\",\"delayRes\":\"30c5b\"}}"
+```
+
+要重做内置快照：`go run ./tools/genresources -version 59 -mainscene eab4a -delayres 30c5b`。
 
 ### 应用宝
 
@@ -651,12 +706,12 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 ## 版本
 
-当前 **1.23.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
+当前 **1.24.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
 
 发新版：
 
 1. 改 `internal/version/version.go` 和 `CHANGELOG.md`
-2. 提交后打标签：`git tag -a v1.23.0 -m "qqfarm-sdk 1.23.0"`
+2. 提交后打标签：`git tag -a v1.24.0 -m "qqfarm-sdk 1.24.0"`
 3. `git push origin main --tags`
 
 GitHub Actions 遇到 `v*` 标签会编好 Windows / Linux / macOS 二进制并开 Release。

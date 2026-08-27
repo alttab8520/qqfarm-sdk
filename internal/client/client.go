@@ -16,6 +16,8 @@ import (
 
 const wsBase = "wss://gate-obt.nqf.qq.com/prod/ws"
 
+const callTimeout = 15 * time.Second
+
 const frogPrankBottle int64 = 5005
 
 type Client struct {
@@ -2837,6 +2839,9 @@ func (c *Client) closeConn() error {
 }
 
 func (c *Client) call(ctx context.Context, service, method string, body []byte) ([]byte, error) {
+	if _, ok := gate.ServiceName(service); !ok {
+		return nil, fmt.Errorf("服务 %q 没有登记官方名字，拒绝发包", service)
+	}
 	if body == nil {
 		body = []byte{}
 	}
@@ -2864,12 +2869,14 @@ func (c *Client) call(ctx context.Context, service, method string, body []byte) 
 		c.mu.Unlock()
 		return nil, err
 	}
-	timer := time.NewTimer(15 * time.Second)
+	timer := time.NewTimer(callTimeout)
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():
+		c.dropPending(seq)
 		return nil, ctx.Err()
 	case <-timer.C:
+		c.dropPending(seq)
 		return nil, fmt.Errorf("RPC %s.%s 超时", service, method)
 	case msg, ok := <-ch:
 		if !ok {
@@ -2880,6 +2887,15 @@ func (c *Client) call(ctx context.Context, service, method string, body []byte) 
 		}
 		return msg.Body, nil
 	}
+}
+
+// dropPending forgets a request the caller gave up on. readLoop deletes the
+// entry itself when a reply lands, so a timed-out call must clean up or the
+// map grows for the life of the session.
+func (c *Client) dropPending(seq int64) {
+	c.mu.Lock()
+	delete(c.pending, seq)
+	c.mu.Unlock()
 }
 
 func (c *Client) uploadAnti(data []byte) ([]byte, error) {

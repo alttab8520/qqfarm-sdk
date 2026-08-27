@@ -2135,6 +2135,7 @@ func NewMux(hub *Hub) *http.ServeMux {
 	registerGap(mux, hub)
 	registerPlatform(mux, hub)
 	registerYYB(mux, hub)
+	registerResource(mux, hub)
 	return mux
 }
 

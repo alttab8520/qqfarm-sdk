@@ -705,9 +705,33 @@ func (fakeYYB) WXData(context.Context, game.YYBWXDataIn) (game.YYBRawOut, error)
 	return game.YYBRawOut{OpenID: "o1", Result: map[string]any{"ok": true}}, nil
 }
 
+type fakeResources struct{}
+
+func (fakeResources) Lookup(in game.ResLookupIn) (game.ResListOut, error) {
+	return game.ResListOut{
+		Entries: []game.ResEntry{{ID: in.IDs[0], Table: "ItemInfo", Name: "金币", Type: "2"}},
+		Total:   1,
+		Source:  "bundled",
+	}, nil
+}
+func (fakeResources) List(game.ResListIn) (game.ResListOut, error) {
+	return game.ResListOut{
+		Entries: []game.ResEntry{{ID: 20001, Table: "ItemInfo", Name: "草莓种子", Type: "5"}},
+		Total:   1,
+		Source:  "bundled",
+	}, nil
+}
+func (fakeResources) Tables() game.ResTablesOut {
+	return game.ResTablesOut{Tables: []game.ResTable{{Name: "ItemInfo", Count: 723}}, Total: 723, Source: "bundled"}
+}
+func (fakeResources) Refresh(context.Context, game.ResRefreshIn) (game.ResRefreshOut, error) {
+	return game.ResRefreshOut{Tables: 50, Entries: 2060, Source: "cdn"}, nil
+}
+
 func testClient(t *testing.T, sess *fakeSession) *http.ServeMux {
 	t.Helper()
-	return NewMux(NewHub(func() game.Session { return sess }).WithYYB(fakeYYB{}))
+	hub := NewHub(func() game.Session { return sess }).WithYYB(fakeYYB{}).WithResources(fakeResources{})
+	return NewMux(hub)
 }
 
 func post(t *testing.T, mux *http.ServeMux, path string, body any) Reply {
@@ -1202,6 +1226,26 @@ func TestBagAfterLogin(t *testing.T) {
 	if out.Code != 0 {
 		t.Fatalf("yyb wxdata %+v", out)
 	}
+	out = post(t, mux, "/Resource/Tables", nil)
+	if out.Code != 0 {
+		t.Fatalf("resource tables %+v", out)
+	}
+	out = post(t, mux, "/Resource/Lookup", game.ResLookupIn{})
+	if out.Code != 400 {
+		t.Fatalf("resource lookup empty %+v", out)
+	}
+	out = post(t, mux, "/Resource/Lookup", game.ResLookupIn{IDs: []int64{1001}})
+	if out.Code != 0 {
+		t.Fatalf("resource lookup %+v", out)
+	}
+	out = post(t, mux, "/Resource/Items", game.ResListIn{Table: "ItemInfo", Type: "5"})
+	if out.Code != 0 {
+		t.Fatalf("resource items %+v", out)
+	}
+	out = post(t, mux, "/Resource/Refresh", game.ResRefreshIn{})
+	if out.Code != 0 {
+		t.Fatalf("resource refresh %+v", out)
+	}
 }
 
 func TestDocs(t *testing.T) {
@@ -1247,6 +1291,10 @@ func TestDocs(t *testing.T) {
 	if paths["/YYB/QR"] == nil || paths["/YYB/Code"] == nil || paths["/YYB/Login"] == nil ||
 		paths["/YYB/Delete"] == nil || paths["/YYB/Profile"] == nil || paths["/YYB/Phone"] == nil || paths["/YYB/WXData"] == nil {
 		t.Fatal("missing yyb paths")
+	}
+	if paths["/Resource/Lookup"] == nil || paths["/Resource/Items"] == nil ||
+		paths["/Resource/Tables"] == nil || paths["/Resource/Refresh"] == nil {
+		t.Fatal("missing resource paths")
 	}
 	raw := rec.Body.Bytes()
 	ping := bytes.Index(raw, []byte(`"/System/Ping"`))

@@ -189,6 +189,62 @@ type YYBRawOut struct {
 	Result map[string]any `json:"result"`
 }
 
+// ResEntry is one row of an official config table. Type is a string because
+// some tables number their types and others spell them out in Chinese.
+type ResEntry struct {
+	ID      int64          `json:"id"`
+	Table   string         `json:"table"`
+	Name    string         `json:"name,omitempty"`
+	Type    string         `json:"type,omitempty"`
+	Desc    string         `json:"desc,omitempty"`
+	IconURL string         `json:"icon_url,omitempty"`
+	Extra   map[string]any `json:"extra,omitempty"`
+}
+
+type ResLookupIn struct {
+	IDs   []int64 `json:"ids"`
+	Table string  `json:"table,omitempty"`
+}
+
+type ResListIn struct {
+	Table   string `json:"table,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Keyword string `json:"keyword,omitempty"`
+	Offset  int    `json:"offset,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
+}
+
+type ResListOut struct {
+	Entries []ResEntry `json:"entries"`
+	Total   int        `json:"total"`
+	Source  string     `json:"source"`
+	Version string     `json:"version,omitempty"`
+}
+
+type ResTable struct {
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
+
+type ResTablesOut struct {
+	Tables  []ResTable `json:"tables"`
+	Total   int        `json:"total"`
+	Source  string     `json:"source"`
+	Version string     `json:"version,omitempty"`
+}
+
+type ResRefreshIn struct {
+	BundleVers map[string]string `json:"bundle_vers,omitempty"`
+}
+
+type ResRefreshOut struct {
+	Tables  int    `json:"tables"`
+	Entries int    `json:"entries"`
+	Source  string `json:"source"`
+	Version string `json:"version,omitempty"`
+	Cache   string `json:"cache,omitempty"`
+}
+
 type HarvestIn struct {
 	LandIDs []int64 `json:"land_ids"`
 	HostGID int64   `json:"host_gid"`

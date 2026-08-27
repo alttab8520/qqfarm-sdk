@@ -14,6 +14,7 @@ type Hub struct {
 	mu   sync.Mutex
 	sess game.Session
 	yyb  yybAPI
+	res  resourceAPI
 }
 
 func NewHub(newS game.Factory) *Hub {

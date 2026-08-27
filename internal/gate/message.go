@@ -1,6 +1,10 @@
 package gate
 
-import "github.com/alttab8520/qqfarm-sdk/internal/pb"
+import (
+	"strings"
+
+	"github.com/alttab8520/qqfarm-sdk/internal/pb"
+)
 
 const (
 	TypeRequest  = 1
@@ -43,6 +47,24 @@ var Services = map[string]string{
 	"SubscribeQQ":   "gamepb.subscribeqqmsg.QQSubscribeService",
 	"SubscribeWX":   "gamepb.subscribewxmsg.OpenPlatformSettingService",
 	"Uicproxy":      "gamepb.uicproxypb.UicprotoxyService",
+	"Gift":          "gamepb.giftpb.GiftService",
+	"Misc":          "gamepb.miscpb.MiscService",
+	"QQGroup":       "gamepb.qqgrouppb.QQGroupService",
+	"RechargeBonus": "gamepb.rechargebonuspb.RechargeBonusService",
+}
+
+// ServiceName maps a short key to the official service name. A value that
+// already looks like a full name passes through, so callers can send a service
+// the table does not know yet. Anything else is a typo the gateway would
+// silently route nowhere.
+func ServiceName(serviceKey string) (string, bool) {
+	if name := Services[serviceKey]; name != "" {
+		return name, true
+	}
+	if strings.Contains(serviceKey, ".") {
+		return serviceKey, true
+	}
+	return serviceKey, false
 }
 
 type Message struct {
@@ -58,10 +80,7 @@ type Message struct {
 }
 
 func EncodeRequest(serviceKey, method string, body []byte, token string, clientSeq, serverSeq int64) []byte {
-	name := Services[serviceKey]
-	if name == "" {
-		name = serviceKey
-	}
+	name, _ := ServiceName(serviceKey)
 	meta := pb.NewEncoder()
 	meta.String(1, name)
 	meta.String(2, method)

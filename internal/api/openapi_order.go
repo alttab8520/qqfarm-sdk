@@ -42,6 +42,7 @@ func openAPITags() []any {
 	return []any{
 		tag("System 系统", "探活、登录状态、ACE 计数"),
 		tag("YYB 应用宝", "微信扫码拿小程序 code，再登录网关。也可删本地账号、拉资料、取手机号"),
+		tag("Resource 资源表", "官方配表。把回包里的裸 ID 翻成名字"),
 		tag("User 用户", "登录、资料、设置、心跳、举报"),
 		tag("Farm 农场", "地块、种植、务农、使坏"),
 		tag("Weather 天气", "实时天气。雨落成诗采集要看 can_collect"),
@@ -96,6 +97,7 @@ func orderedPaths(m map[string]any) orderedObject {
 		"/YYB/Accounts", "/YYB/QR", "/YYB/Image", "/YYB/Poll", "/YYB/Confirm",
 		"/YYB/Refresh", "/YYB/Code", "/YYB/Login", "/YYB/Delete", "/YYB/Profile",
 		"/YYB/Phone", "/YYB/WXData",
+		"/Resource/Tables", "/Resource/Lookup", "/Resource/Items", "/Resource/Refresh",
 		"/User/Login", "/User/GetInfo", "/User/Brief", "/User/BatchInfo",
 		"/User/SetDisplay", "/User/Settings", "/User/SetSettings",
 		"/User/DeleteAccount", "/User/DecryptOpenData", "/User/QQRecommendAuth",
