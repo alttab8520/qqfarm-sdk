@@ -710,7 +710,7 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 发新版：
 
-1. 改 `internal/version/version.go` 和 `CHANGELOG.md`
+1. 改 `internal/version/version.go`
 2. 提交后打标签：`git tag -a v1.24.0 -m "qqfarm-sdk 1.24.0"`
 3. `git push origin main --tags`
 
