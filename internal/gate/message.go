@@ -37,6 +37,12 @@ var Services = map[string]string{
 	"SolarTerms":    "gamepb.solartermspb.SolarTermsService",
 	"Achieve":       "gamepb.achievepb.AchieveService",
 	"Ace":           "gamepb.acepb.AceService",
+	"QQVip":         "gamepb.qqvippb.QQVipService",
+	"Marquee":       "gamepb.marqueepb.MarqueeService",
+	"SystemOpen":    "gamepb.systemopenpb.SSSystemOpenService",
+	"SubscribeQQ":   "gamepb.subscribeqqmsg.QQSubscribeService",
+	"SubscribeWX":   "gamepb.subscribewxmsg.OpenPlatformSettingService",
+	"Uicproxy":      "gamepb.uicproxypb.UicprotoxyService",
 }
 
 type Message struct {

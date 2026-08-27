@@ -1,6 +1,7 @@
 /qqfarm-sdk
 /qqfarm-sdk.exe
 *.exe
+yyb_data/
 *.wasm
 !data/tsdk-v3.9.0.wasm
 __pycache__/
