@@ -34,7 +34,7 @@
 | `5005` | 青蛙使坏瓶。别人放在你家是农场级事件。放走 `Farm/PutSocial`（不带 `land_ids`），清走 `Farm/CleanEvents`（或 `Farm/Farming` 带 `item_ids:[5005]`） |
 | `5006` | 乌云使坏瓶。别人放在地块作物上。放走 `Farm/PutSocial`（必须带地），清走 `Farm/CleanSocial`，`item_ids:[5006]`，`land_ids` 从 `Farm/Refresh` 的 `social_items` 取 |
 
-登录后会连游戏网关，接口走真实 RPC。请求体需要官方加密运行时：默认用仓库里的 `data/tsdk-v3.9.0.wasm`，也可设置 `FARM_WASM` 指向其他路径。文件必须是 160975 字节，SHA256 `0001ab8d68ac35309dbdaa16310aeebf0fd578976a91562db12257786e3a2e54`（微信包 59，自报 `v3.9.0.1787640498`）。
+登录后会连游戏网关，接口走真实 RPC。请求体需要官方加密运行时：默认用仓库里的 `data/tsdk-v3.9.0.wasm`，也可设置 `FARM_WASM` 指向其他路径。文件必须是 161032 字节，SHA256 `693adf452dd8b616ec44868f359677b376a485eee30e4a67b6cfa41cd52800f9`（微信包 61，自报 `v3.9.0.1788164911`）。
 
 登录成功后会自动跑 ACE 长会话，调用方不用自己发反作弊包。官方 `AceService` 只有 `AntiData`，包体是运行时吐出的不透明字节，组不出合法 JSON，所以没有 `/Ace/*`。进度看 `POST /System/Status` 的 `ace`。
 
@@ -440,11 +440,11 @@ curl -X POST http://127.0.0.1:8765/YYB/Login -d "{\"ref\":\"1\"}"
 
 ### 活动 · 公益小红花
 
-活动号 `2026090901`。仅活动号，开停未核实。
+活动号 `2026090901`。游戏公告 2026-09-01 ~ 2026-09-09。精确看 List。
 
 | 路径 | 说明 |
 |---|---|
-| `POST /Activity/CharityShare` | 公益花领分享奖，body: `{"id"}`。活动号 `2026090901`，开停看带 `charity` 那条的 `start` / `end` |
+| `POST /Activity/CharityShare` | 公益花领分享奖，body: `{"id"}`。活动号 `2026090901`。公告 2026-09-01 ~ 2026-09-09，精确看带 `charity` 那条的 `start` / `end` |
 | `POST /Activity/CharityDonate` | 公益花捐出全部爱心，body: `{"id"}`。档期同 `CharityShare` |
 | `POST /Activity/CharityClaim` | 公益花领个人档，body: `{"id","score"}`。`score` 是档位所需个人积分。档期同 `CharityShare` |
 | `POST /Activity/CharityXhh` | 公益花领星辉回，body: `{"id"}`。档期同 `CharityShare` |
@@ -683,7 +683,7 @@ QQ 订阅和微信订阅消息。不是支付订阅。
 | 鹊桥寄情·赠香囊 | `2026081802` | 2026-08-18 10:00 | 2026-08-22 23:59 | 鹊桥寄情礼包 | `gift` |
 | 雨落成诗 | `2026070301` | 2026-08-26 10:00 | 2026-09-08 23:59 | 雷雨每日/礼包 | `lottery` / `shop` / `nodes` |
 | 宠物寻宝 | `2026090101` | 该条 `start` | 该条 `end` | 仅活动号，未核实 | `hunt` |
-| 公益小红花 | `2026090901` | 该条 `start` | 该条 `end` | 仅活动号，未核实 | `charity` |
+| 公益小红花 | `2026090901` | 2026-09-01 | 2026-09-09 | 游戏公告；精确看该条 `start` / `end` | `charity` |
 | 抽奖 / 签到 / 随机店 | 当期活动号 | 该条 `start` | 该条 `end` | 看列表 | `draw` / `signin` / `rand_shop` |
 
 ## 运行
@@ -706,12 +706,12 @@ curl -X POST http://127.0.0.1:8765/System/Ping
 
 ## 版本
 
-当前 **1.24.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
+当前 **1.25.0**。仓库：https://github.com/alttab8520/qqfarm-sdk
 
 发新版：
 
 1. 改 `internal/version/version.go`
-2. 提交后打标签：`git tag -a v1.24.0 -m "qqfarm-sdk 1.24.0"`
+2. 提交后打标签：`git tag -a v1.25.0 -m "qqfarm-sdk 1.25.0"`
 3. `git push origin main --tags`
 
 GitHub Actions 遇到 `v*` 标签会编好 Windows / Linux / macOS 二进制并开 Release。
@@ -723,4 +723,4 @@ GitHub Actions 遇到 `v*` 标签会编好 Windows / Linux / macOS 二进制并�
 - 仓库里不要提交账号、票据
 - 登录前必须能找到 `tsdk-v3.9.0.wasm`，否则 `/User/Login` 直接失败
 - ACE 登录后自动跑，不要自己发 `Ace.AntiData`。看 `System/Status` 的 `ace`
-- 游戏版本默认 `1.13.3.11_20260826`，可用 `FARM_GAME_VER` 覆盖
+- 游戏版本默认 `1.13.3.16_20260826`，可用 `FARM_GAME_VER` 覆盖

@@ -37,7 +37,8 @@ const (
 	// 宠物寻宝。仅活动号，开停未核实。看带 hunt 那条的 start / end。client_id 18。
 	ActHunt = 2026090101
 
-	// 公益小红花。仅活动号，开停未核实。看带 charity 那条的 start / end。
+	// 公益小红花。活动号 2026090901。游戏公告 2026-09-01 ~ 2026-09-09。
+	// 精确看带 charity 那条的 start / end。
 	ActCharity = 2026090901
 
 	// 粽香大比拼（阵营加油）。仅活动号，开停未核实。看带 cheer 那条的 start / end。

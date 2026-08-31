@@ -1,4 +1,4 @@
 package version
 
 // Version is the SDK release. Bump with CHANGELOG.md and tag sdk-vX.Y.Z.
-var Version = "1.24.0"
+var Version = "1.25.0"

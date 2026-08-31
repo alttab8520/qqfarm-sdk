@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	fallbackGameVersion = "1.13.3.11_20260826"
+	fallbackGameVersion = "1.13.3.16_20260826"
 	channelID           = "1256"
 )
 

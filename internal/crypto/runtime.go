@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	officialVersion  = "v3.9.0.1787640498"
-	officialSHA256   = "0001ab8d68ac35309dbdaa16310aeebf0fd578976a91562db12257786e3a2e54"
-	officialByteSize = 160975
+	officialVersion  = "v3.9.0.1788164911"
+	officialSHA256   = "693adf452dd8b616ec44868f359677b376a485eee30e4a67b6cfa41cd52800f9"
+	officialByteSize = 161032
 	defaultAppID     = "wx5306c5978fdb76e4"
 	defaultGameID    = 3167
 	defaultAppKey    = "0"

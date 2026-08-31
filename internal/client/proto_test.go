@@ -659,12 +659,12 @@ func TestEncodeBatchUseAndHeartbeat(t *testing.T) {
 		t.Fatalf("%+v", item)
 	}
 
-	raw = encodeHeartbeat(7, "1.13.3.11_20260826")
+	raw = encodeHeartbeat(7, "1.13.3.16_20260826")
 	m, err := pb.FieldMap(raw)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if pb.IntField(m, 1) != 7 || pb.StringField(m, 2) != "1.13.3.11_20260826" {
+	if pb.IntField(m, 1) != 7 || pb.StringField(m, 2) != "1.13.3.16_20260826" {
 		t.Fatalf("%+v", m)
 	}
 
